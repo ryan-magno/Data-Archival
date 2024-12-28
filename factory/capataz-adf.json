@@ -1,0 +1,9 @@
+{
+	"name": "capataz-adf",
+	"location": "southeastasia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "36908f5f-cbf0-4aef-b47c-bb192bdeed3e",
+		"tenantId": "84c31ca0-ac3b-4eae-ad11-519d80233e6f"
+	}
+}
