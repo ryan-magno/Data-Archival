@@ -1,0 +1,27 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "capataz-adf"
+		},
+		"CapatazDBLS_password": {
+			"value": ""
+		},
+		"CapatazDataLake_accountKey": {
+			"value": ""
+		},
+		"CapatazDBLS_properties_typeProperties_server": {
+			"value": "data-archival-server.database.windows.net"
+		},
+		"CapatazDBLS_properties_typeProperties_database": {
+			"value": "New-Capataz-Staging"
+		},
+		"CapatazDBLS_properties_typeProperties_userName": {
+			"value": "sqladmin"
+		},
+		"CapatazDataLake_properties_typeProperties_url": {
+			"value": "https://dataarchivalsa.dfs.core.windows.net/"
+		}
+	}
+}
