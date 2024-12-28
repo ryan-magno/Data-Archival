@@ -5,7 +5,14 @@
 			{
 				"name": "Get Metadata",
 				"type": "Lookup",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Update Metadata",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -18,7 +25,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "SELECT TableName FROM dbo.MetadataTable WHERE IsActive = 1",
+							"value": "SELECT TableName, ArchivalDate FROM dbo.MetadataTable WHERE IsActive = 1",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
@@ -64,7 +71,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"storedProcedureName": "[dbo].[StartMonitoring]",
+								"storedProcedureName": "[dbo].[StartMonitoring1]",
 								"storedProcedureParameters": {
 									"PipelineRunID": {
 										"value": {
@@ -80,26 +87,12 @@
 										},
 										"type": "String"
 									},
-									"Year": {
+									"ArchivalDate": {
 										"value": {
-											"value": "@variables('Year')",
+											"value": "@item().ArchivalDate",
 											"type": "Expression"
 										},
-										"type": "Int16"
-									},
-									"Month": {
-										"value": {
-											"value": "@variables('Month')",
-											"type": "Expression"
-										},
-										"type": "Int16"
-									},
-									"Day": {
-										"value": {
-											"value": "@variables('Day')",
-											"type": "Expression"
-										},
-										"type": "Int16"
+										"type": "Datetime"
 									}
 								}
 							},
@@ -131,7 +124,7 @@
 								"source": {
 									"type": "AzureSqlSource",
 									"sqlReaderQuery": {
-										"value": "@if( \n    equals(item().TableName, 'ProfileTimeKeepingWhosWorkings'),\n    concat(\n        'SELECT * FROM [', item().TableName, '] WITH (NOLOCK) WHERE YEAR([DateTimeInOut]) = ', variables('Year'), \n        ' AND MONTH([DateTimeInOut]) = ', variables('Month'), \n        if(or(or(equals(variables('Day'), null), equals(variables('Day'), '')), equals(variables('Day'), 0)), '', concat(' AND DAY([DateTimeInOut]) = ', variables('Day')))\n    ),\n    concat(\n        'SELECT * FROM [', item().TableName, '] WITH (NOLOCK) WHERE YEAR([CreatedDate]) = ', variables('Year'), \n        ' AND MONTH([CreatedDate]) = ', variables('Month'), \n        if(or(or(equals(variables('Day'), null), equals(variables('Day'), '')), equals(variables('Day'), 0)), '', concat(' AND DAY([CreatedDate]) = ', variables('Day')))\n    )\n)",
+										"value": "@if(\n    equals(item().TableName, 'ProfileTimeKeepingWhosWorkings'),\n    concat(\n        'SELECT * FROM [', item().TableName, '] WITH (NOLOCK) WHERE YEAR([DateTimeInOut]) = ', formatDateTime(item().ArchivalDate, 'yyyy'), ' AND MONTH([DateTimeInOut]) = ', formatDateTime(item().ArchivalDate, 'MM'), ' AND DAY([DateTimeInOut]) = ', formatDateTime(item().ArchivalDate, 'dd')\n    ),\n    concat(\n        'SELECT * FROM [', item().TableName, '] WITH (NOLOCK) WHERE YEAR([CreatedDate]) = ', formatDateTime(item().ArchivalDate, 'yyyy'), ' AND MONTH([CreatedDate]) = ', formatDateTime(item().ArchivalDate, 'MM'), ' AND DAY([CreatedDate]) = ', formatDateTime(item().ArchivalDate, 'dd')\n    )\n)\n",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
@@ -168,11 +161,11 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"FileName": {
-											"value": "@concat(\n    variables('Year'), '-', \n    variables('Month'), \n    if(equals(variables('Day'), ''), '', concat('-', variables('Day'))),\n    ' - ', pipeline().RunId, '.parquet'\n)\n",
+											"value": "@concat(\n    substring(item().ArchivalDate, 0, 10), ' - ', pipeline().RunId, '.parquet'\n)\n",
 											"type": "Expression"
 										},
 										"Directory": {
-											"value": "@concat(item().TableName, '/', variables('Year'), '/', variables('Month'), '/')\n",
+											"value": "@concat(item().TableName, '/', substring(item().ArchivalDate, 0, 4), '/', substring(item().ArchivalDate, 5, 2), '/')\n",
 											"type": "Expression"
 										}
 									}
@@ -342,20 +335,6 @@
 										"typeProperties": {
 											"storedProcedureName": "[dbo].[DeleteArchivedData]",
 											"storedProcedureParameters": {
-												"Day": {
-													"value": {
-														"value": "@variables('Day')",
-														"type": "Expression"
-													},
-													"type": "Int16"
-												},
-												"Month": {
-													"value": {
-														"value": "@variables('Month')",
-														"type": "Expression"
-													},
-													"type": "Int16"
-												},
 												"PipelineRunID": {
 													"value": {
 														"value": "@pipeline().RunId",
@@ -363,12 +342,9 @@
 													},
 													"type": "String"
 												},
-												"Year": {
-													"value": {
-														"value": "@variables('Year')",
-														"type": "Expression"
-													},
-													"type": "Int16"
+												"ArchivalDate": {
+													"value": "@item().ArchivalDate",
+													"type": "Datetime"
 												}
 											}
 										},
@@ -410,6 +386,26 @@
 						}
 					]
 				}
+			},
+			{
+				"name": "Update Metadata",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[UpdateMetadata]"
+				},
+				"linkedServiceName": {
+					"referenceName": "CapatazDBLS",
+					"type": "LinkedServiceReference"
+				}
 			}
 		],
 		"parameters": {
@@ -426,18 +422,6 @@
 			"RowCountSink": {
 				"type": "String",
 				"defaultValue": "0"
-			},
-			"Year": {
-				"type": "Integer",
-				"defaultValue": 2024
-			},
-			"Month": {
-				"type": "Integer",
-				"defaultValue": 4
-			},
-			"Day": {
-				"type": "Integer",
-				"defaultValue": 2
 			}
 		},
 		"annotations": [],
