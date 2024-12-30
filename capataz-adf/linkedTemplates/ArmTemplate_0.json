@@ -524,7 +524,7 @@
 												},
 												"userProperties": [],
 												"typeProperties": {
-													"storedProcedureName": "[[dbo].[DeleteArchivedData1]",
+													"storedProcedureName": "[[dbo].[DeleteArchivedData]",
 													"storedProcedureParameters": {
 														"Day": {
 															"value": {
@@ -1441,7 +1441,7 @@
 												},
 												"userProperties": [],
 												"typeProperties": {
-													"storedProcedureName": "[[dbo].[DeleteArchivedData1]",
+													"storedProcedureName": "[[dbo].[DeleteArchivedData]",
 													"storedProcedureParameters": {
 														"Day": {
 															"value": {
