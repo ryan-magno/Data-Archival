@@ -4,6 +4,7 @@
 		"activities": [
 			{
 				"name": "Get Metadata",
+				"description": "Get the tables, year, month, and day to archive",
 				"type": "Lookup",
 				"dependsOn": [
 					{
@@ -25,7 +26,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "SELECT TableName, ArchivalDate FROM dbo.MetadataTable WHERE IsActive = 1",
+							"value": "SELECT TableName, Year, Month, Day FROM dbo.MetadataTable WHERE IsActive = 1",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
@@ -71,7 +72,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"storedProcedureName": "[dbo].[StartMonitoring1]",
+								"storedProcedureName": "[dbo].[StartMonitoring]",
 								"storedProcedureParameters": {
 									"PipelineRunID": {
 										"value": {
@@ -87,12 +88,26 @@
 										},
 										"type": "String"
 									},
-									"ArchivalDate": {
+									"Year": {
 										"value": {
-											"value": "@item().ArchivalDate",
+											"value": "@item().Year",
 											"type": "Expression"
 										},
-										"type": "Datetime"
+										"type": "Int16"
+									},
+									"Month": {
+										"value": {
+											"value": "@item().Month",
+											"type": "Expression"
+										},
+										"type": "Int16"
+									},
+									"Day": {
+										"value": {
+											"value": "@item().Day",
+											"type": "Expression"
+										},
+										"type": "Int16"
 									}
 								}
 							},
@@ -124,7 +139,7 @@
 								"source": {
 									"type": "AzureSqlSource",
 									"sqlReaderQuery": {
-										"value": "@if(\n    equals(item().TableName, 'ProfileTimeKeepingWhosWorkings'),\n    concat(\n        'SELECT * FROM [', item().TableName, '] WITH (NOLOCK) WHERE YEAR([DateTimeInOut]) = ', formatDateTime(item().ArchivalDate, 'yyyy'), ' AND MONTH([DateTimeInOut]) = ', formatDateTime(item().ArchivalDate, 'MM'), ' AND DAY([DateTimeInOut]) = ', formatDateTime(item().ArchivalDate, 'dd')\n    ),\n    concat(\n        'SELECT * FROM [', item().TableName, '] WITH (NOLOCK) WHERE YEAR([CreatedDate]) = ', formatDateTime(item().ArchivalDate, 'yyyy'), ' AND MONTH([CreatedDate]) = ', formatDateTime(item().ArchivalDate, 'MM'), ' AND DAY([CreatedDate]) = ', formatDateTime(item().ArchivalDate, 'dd')\n    )\n)\n",
+										"value": "@if(\n    equals(item().TableName, 'ProfileTimeKeepingWhosWorkings'),\n    concat(\n        'SELECT * FROM [', item().TableName, '] WITH (NOLOCK) WHERE YEAR([DateTimeInOut]) = ', item().Year, ' AND MONTH([DateTimeInOut]) = ', item().Month, ' AND DAY([DateTimeInOut]) = ', item().Day\n    ),\n    concat(\n        'SELECT * FROM [', item().TableName, '] WITH (NOLOCK) WHERE YEAR([CreatedDate]) = ', item().Year, ' AND MONTH([CreatedDate]) = ', item().Month, ' AND DAY([CreatedDate]) = ', item().Day\n    )\n)\n",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
@@ -226,7 +241,8 @@
 										"value": {
 											"value": "@pipeline().RunId",
 											"type": "Expression"
-										}
+										},
+										"type": "String"
 									}
 								}
 							},
@@ -417,7 +433,7 @@
 									"partitionOption": "None"
 								},
 								"dataset": {
-									"referenceName": "CapatazMetadata",
+									"referenceName": "CapatazDBDataset",
 									"type": "DatasetReference"
 								},
 								"firstRowOnly": true

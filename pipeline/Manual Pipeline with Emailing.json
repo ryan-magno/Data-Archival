@@ -340,7 +340,7 @@
 										},
 										"userProperties": [],
 										"typeProperties": {
-											"storedProcedureName": "[dbo].[DeleteArchivedData]",
+											"storedProcedureName": "[dbo].[DeleteArchivedData1]",
 											"storedProcedureParameters": {
 												"Day": {
 													"value": {
@@ -385,7 +385,7 @@
 							"type": "WebActivity",
 							"dependsOn": [
 								{
-									"activity": "If Condition for Data Validation",
+									"activity": "RowCountDeleted Value",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -403,8 +403,40 @@
 								"method": "POST",
 								"url": "https://prod-09.southeastasia.logic.azure.com:443/workflows/2165d75dbf544f4bac16eea2a4046fc0/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=ZS_KkiU12DYTIxQ5cYi5QgSt53TuW5l9j0x1stp6Q_Y",
 								"body": {
-									"value": "{\n    \"TableName\": \"@{item().TableName}\",\n    \"RunId\": \"@{pipeline().RunId}\",\n    \"RowsRead\": \"@{activity('SQL Database to ADLS').output.rowsRead}\",\n    \"RowsCopied\": \"@{activity('SQL Database to ADLS').output.rowsCopied}\",\n    \"Year\": \"@{variables('Year')}\",\n    \"Month\": \"@{variables('Month')}\",\n    \"Day\": \"@{variables('Day')}\",\n    \"TriggerTime\": \"@{pipeline().TriggerTime}\"\n}\n",
+									"value": "{\n    \"TableName\": \"@{item().TableName}\",\n    \"RunId\": \"@{pipeline().RunId}\",\n    \"RowsRead\": \"@{activity('SQL Database to ADLS').output.rowsRead}\",\n    \"RowsCopied\": \"@{activity('SQL Database to ADLS').output.rowsCopied}\",\n    \"RowCountDeleted\": \"@{activity('RowCountDeleted Value').output.firstRow.RowCountDeleted}\",\n    \"Year\": \"@{variables('Year')}\",\n    \"Month\": \"@{variables('Month')}\",\n    \"Day\": \"@{variables('Day')}\",\n    \"TriggerTime\": \"@{pipeline().TriggerTime}\"\n}\n",
 									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "RowCountDeleted Value",
+							"type": "Lookup",
+							"dependsOn": [
+								{
+									"activity": "If Condition for Data Validation",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": "SELECT RowCountDeleted\nFROM dbo.ArchivalMonitoring\nWHERE TableName = '@{item().TableName}'\n  AND PipelineRunID = '@{pipeline().RunId}'",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "CapatazDBDataset",
+									"type": "DatasetReference"
 								}
 							}
 						}
@@ -433,11 +465,11 @@
 			},
 			"Month": {
 				"type": "Integer",
-				"defaultValue": 4
+				"defaultValue": 5
 			},
 			"Day": {
 				"type": "Integer",
-				"defaultValue": 2
+				"defaultValue": 30
 			}
 		},
 		"annotations": [],
