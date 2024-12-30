@@ -430,7 +430,10 @@
 							"typeProperties": {
 								"source": {
 									"type": "AzureSqlSource",
-									"sqlReaderQuery": "SELECT RowCountDeleted\nFROM dbo.ArchivalMonitoring\nWHERE TableName = '@{item().TableName}'\n  AND PipelineRunID = '@{pipeline().RunId}'",
+									"sqlReaderQuery": {
+										"value": "SELECT RowCountDeleted\nFROM dbo.ArchivalMonitoring\nWHERE TableName = '@{item().TableName}'\n  AND PipelineRunID = '@{pipeline().RunId}'",
+										"type": "Expression"
+									},
 									"queryTimeout": "02:00:00",
 									"partitionOption": "None"
 								},
@@ -465,11 +468,10 @@
 			},
 			"Month": {
 				"type": "Integer",
-				"defaultValue": 5
+				"defaultValue": 6
 			},
 			"Day": {
-				"type": "Integer",
-				"defaultValue": 30
+				"type": "Integer"
 			}
 		},
 		"annotations": [],
