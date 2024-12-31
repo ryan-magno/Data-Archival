@@ -322,7 +322,7 @@
 										"source": {
 											"type": "AzureSqlSource",
 											"sqlReaderQuery": {
-												"value": "@if(\n    equals(item().TableName, 'ProfileTimeKeepingWhosWorkings'),\n    concat(\n        'SELECT * FROM [', item().TableName, '] WITH (NOLOCK) WHERE YEAR([DateTimeInOut]) = ', item().ArchivalYear, ' AND MONTH([DateTimeInOut]) = ', item().ArchivalMonth, ' AND DAY([DateTimeInOut]) = ', item().ArchivalDay\n    ),\n    concat(\n        'SELECT * FROM [', item().TableName, '] WITH (NOLOCK) WHERE YEAR([CreatedDate]) = ', item().ArchivalYear, ' AND MONTH([CreatedDate]) = ', item().ArchivalMonth, ' AND DAY([CreatedDate]) = ', item().ArchivalDay\n    )\n)\n",
+												"value": "@if(\n    or(\n        equals(item().TableName, 'ProfileTimeKeepingWhosWorkings'),\n        equals(item().TableName, 'ProfileTimeKeepingWhosWorkings.Archive')\n    ),\n    concat(\n        'SELECT * FROM [', item().TableName, '] WITH (NOLOCK) WHERE YEAR([DateTimeInOut]) = ', item().ArchivalYear, \n        ' AND MONTH([DateTimeInOut]) = ', item().ArchivalMonth, \n        ' AND DAY([DateTimeInOut]) = ', item().ArchivalDay\n    ),\n    concat(\n        'SELECT * FROM [', item().TableName, '] WITH (NOLOCK) WHERE YEAR([CreatedDate]) = ', item().ArchivalYear, \n        ' AND MONTH([CreatedDate]) = ', item().ArchivalMonth, \n        ' AND DAY([CreatedDate]) = ', item().ArchivalDay\n    )\n)\n",
 												"type": "Expression"
 											},
 											"queryTimeout": "02:00:00",
@@ -696,502 +696,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/Manual Pipeline with Emailing')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Get Metadata",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": {
-									"value": "SELECT TableName FROM dbo.MetadataTable WHERE IsActive = 1",
-									"type": "Expression"
-								},
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "CapatazMetadata",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "Iterate the Tables",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "Get Metadata",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Get Metadata').output.value",
-								"type": "Expression"
-							},
-							"isSequential": false,
-							"batchCount": 6,
-							"activities": [
-								{
-									"name": "Start Monitoring",
-									"type": "SqlServerStoredProcedure",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"storedProcedureName": "[[dbo].[StartMonitoring]",
-										"storedProcedureParameters": {
-											"PipelineRunID": {
-												"value": {
-													"value": "@pipeline().RunId",
-													"type": "Expression"
-												},
-												"type": "String"
-											},
-											"TableName": {
-												"value": {
-													"value": "@item().TableName",
-													"type": "Expression"
-												},
-												"type": "String"
-											},
-											"Year": {
-												"value": {
-													"value": "@variables('Year')",
-													"type": "Expression"
-												},
-												"type": "Int16"
-											},
-											"Month": {
-												"value": {
-													"value": "@variables('Month')",
-													"type": "Expression"
-												},
-												"type": "Int16"
-											},
-											"Day": {
-												"value": {
-													"value": "@variables('Day')",
-													"type": "Expression"
-												},
-												"type": "Int16"
-											}
-										}
-									},
-									"linkedServiceName": {
-										"referenceName": "CapatazDBLS",
-										"type": "LinkedServiceReference"
-									}
-								},
-								{
-									"name": "SQL Database to ADLS",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "Start Monitoring",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "AzureSqlSource",
-											"sqlReaderQuery": {
-												"value": "@if( \n    equals(item().TableName, 'ProfileTimeKeepingWhosWorkings'),\n    concat(\n        'SELECT * FROM [', item().TableName, '] WITH (NOLOCK) WHERE YEAR([DateTimeInOut]) = ', variables('Year'), \n        ' AND MONTH([DateTimeInOut]) = ', variables('Month'), \n        if(or(or(equals(variables('Day'), null), equals(variables('Day'), '')), equals(variables('Day'), 0)), '', concat(' AND DAY([DateTimeInOut]) = ', variables('Day')))\n    ),\n    concat(\n        'SELECT * FROM [', item().TableName, '] WITH (NOLOCK) WHERE YEAR([CreatedDate]) = ', variables('Year'), \n        ' AND MONTH([CreatedDate]) = ', variables('Month'), \n        if(or(or(equals(variables('Day'), null), equals(variables('Day'), '')), equals(variables('Day'), 0)), '', concat(' AND DAY([CreatedDate]) = ', variables('Day')))\n    )\n)",
-												"type": "Expression"
-											},
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "ParquetSink",
-											"storeSettings": {
-												"type": "AzureBlobFSWriteSettings"
-											},
-											"formatSettings": {
-												"type": "ParquetWriteSettings"
-											}
-										},
-										"enableStaging": false,
-										"translator": {
-											"type": "TabularTranslator",
-											"typeConversion": true,
-											"typeConversionSettings": {
-												"allowDataTruncation": true,
-												"treatBooleanAsNumber": false
-											}
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "CapatazDBDataset",
-											"type": "DatasetReference",
-											"parameters": {}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "SinkDatasetParquet",
-											"type": "DatasetReference",
-											"parameters": {
-												"FileName": {
-													"value": "@concat(\n    variables('Year'), '-', \n    variables('Month'), \n    if(equals(variables('Day'), ''), '', concat('-', variables('Day'))),\n    ' - ', pipeline().RunId, '.parquet'\n)\n",
-													"type": "Expression"
-												},
-												"Directory": {
-													"value": "@concat(item().TableName, '/', variables('Year'), '/', variables('Month'), '/')\n",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								},
-								{
-									"name": "Update Monitoring Table",
-									"type": "SqlServerStoredProcedure",
-									"dependsOn": [
-										{
-											"activity": "SQL Database to ADLS",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"storedProcedureName": "[[dbo].[UpdateMonitoring]",
-										"storedProcedureParameters": {
-											"Errors": {
-												"value": {
-													"value": "@activity('SQL Database to ADLS').error",
-													"type": "Expression"
-												},
-												"type": "String"
-											},
-											"RowCountSink": {
-												"value": {
-													"value": "@activity('SQL Database to ADLS').output.rowsCopied",
-													"type": "Expression"
-												},
-												"type": "Int16"
-											},
-											"RowCountSource": {
-												"value": {
-													"value": "@activity('SQL Database to ADLS').output.rowsRead",
-													"type": "Expression"
-												},
-												"type": "Int16"
-											},
-											"TableName": {
-												"value": {
-													"value": "@item().TableName",
-													"type": "Expression"
-												},
-												"type": "String"
-											},
-											"PipelineRunID": {
-												"value": {
-													"value": "@pipeline().RunId",
-													"type": "Expression"
-												}
-											}
-										}
-									},
-									"linkedServiceName": {
-										"referenceName": "CapatazDBLS",
-										"type": "LinkedServiceReference"
-									}
-								},
-								{
-									"name": "Log Errors",
-									"type": "SqlServerStoredProcedure",
-									"dependsOn": [
-										{
-											"activity": "SQL Database to ADLS",
-											"dependencyConditions": [
-												"Failed"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"storedProcedureName": "[[dbo].[LogError]",
-										"storedProcedureParameters": {
-											"Errors": {
-												"value": {
-													"value": "@concat('Errors: ', string(activity('SQL Database to ADLS').output.errors))\n",
-													"type": "Expression"
-												},
-												"type": "String"
-											},
-											"TableName": {
-												"value": {
-													"value": "@item().TableName",
-													"type": "Expression"
-												},
-												"type": "String"
-											},
-											"PipelineRunID": {
-												"value": {
-													"value": "@pipeline().RunId",
-													"type": "Expression"
-												}
-											}
-										}
-									},
-									"linkedServiceName": {
-										"referenceName": "CapatazDBLS",
-										"type": "LinkedServiceReference"
-									}
-								},
-								{
-									"name": "If Condition for Data Validation",
-									"type": "IfCondition",
-									"dependsOn": [
-										{
-											"activity": "Update Monitoring Table",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"userProperties": [],
-									"typeProperties": {
-										"expression": {
-											"value": "@equals(variables('RowCountSource'), variables('RowCountSink'))",
-											"type": "Expression"
-										},
-										"ifFalseActivities": [
-											{
-												"name": "Fail Activity",
-												"type": "Fail",
-												"dependsOn": [],
-												"userProperties": [],
-												"typeProperties": {
-													"message": {
-														"value": "Row count mismatch detected. Source row count: @{variables('RowCountSource')}, Sink row count: @{variables('RowCountSink')}.\n",
-														"type": "Expression"
-													},
-													"errorCode": {
-														"value": "RowCountMismatch",
-														"type": "Expression"
-													}
-												}
-											}
-										],
-										"ifTrueActivities": [
-											{
-												"name": "Delete Archived Data",
-												"type": "SqlServerStoredProcedure",
-												"dependsOn": [],
-												"policy": {
-													"timeout": "0.12:00:00",
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
-													"secureOutput": false,
-													"secureInput": false
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"storedProcedureName": "[[dbo].[DeleteArchivedData]",
-													"storedProcedureParameters": {
-														"Day": {
-															"value": {
-																"value": "@variables('Day')",
-																"type": "Expression"
-															},
-															"type": "Int16"
-														},
-														"Month": {
-															"value": {
-																"value": "@variables('Month')",
-																"type": "Expression"
-															},
-															"type": "Int16"
-														},
-														"PipelineRunID": {
-															"value": {
-																"value": "@pipeline().RunId",
-																"type": "Expression"
-															},
-															"type": "String"
-														},
-														"Year": {
-															"value": {
-																"value": "@variables('Year')",
-																"type": "Expression"
-															},
-															"type": "Int16"
-														}
-													}
-												},
-												"linkedServiceName": {
-													"referenceName": "CapatazDBLS",
-													"type": "LinkedServiceReference"
-												}
-											}
-										]
-									}
-								},
-								{
-									"name": "Send Email",
-									"type": "WebActivity",
-									"dependsOn": [
-										{
-											"activity": "RowCountDeleted Value",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"method": "POST",
-										"headers": {},
-										"url": "https://prod-09.southeastasia.logic.azure.com:443/workflows/2165d75dbf544f4bac16eea2a4046fc0/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=ZS_KkiU12DYTIxQ5cYi5QgSt53TuW5l9j0x1stp6Q_Y",
-										"body": {
-											"value": "{\n    \"TableName\": \"@{item().TableName}\",\n    \"RunId\": \"@{pipeline().RunId}\",\n    \"RowsRead\": \"@{activity('SQL Database to ADLS').output.rowsRead}\",\n    \"RowsCopied\": \"@{activity('SQL Database to ADLS').output.rowsCopied}\",\n    \"RowCountDeleted\": \"@{activity('RowCountDeleted Value').output.firstRow.RowCountDeleted}\",\n    \"Year\": \"@{variables('Year')}\",\n    \"Month\": \"@{variables('Month')}\",\n    \"Day\": \"@{variables('Day')}\",\n    \"TriggerTime\": \"@{pipeline().TriggerTime}\"\n}\n",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "RowCountDeleted Value",
-									"type": "Lookup",
-									"dependsOn": [
-										{
-											"activity": "If Condition for Data Validation",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "AzureSqlSource",
-											"sqlReaderQuery": {
-												"value": "SELECT RowCountDeleted\nFROM dbo.ArchivalMonitoring\nWHERE TableName = '@{item().TableName}'\n  AND PipelineRunID = '@{pipeline().RunId}'",
-												"type": "Expression"
-											},
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"dataset": {
-											"referenceName": "CapatazDBDataset",
-											"type": "DatasetReference",
-											"parameters": {}
-										}
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"MetadataTableName": {
-						"type": "string",
-						"defaultValue": "dbo.MetadataTable"
-					}
-				},
-				"variables": {
-					"RowCountSource": {
-						"type": "String",
-						"defaultValue": "0"
-					},
-					"RowCountSink": {
-						"type": "String",
-						"defaultValue": "0"
-					},
-					"Year": {
-						"type": "Integer",
-						"defaultValue": 2024
-					},
-					"Month": {
-						"type": "Integer",
-						"defaultValue": 6
-					},
-					"Day": {
-						"type": "Integer"
-					}
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-12-28T05:58:24Z"
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/CapatazMetadata')]",
-				"[concat(variables('factoryId'), '/linkedServices/CapatazDBLS')]",
-				"[concat(variables('factoryId'), '/datasets/CapatazDBDataset')]",
-				"[concat(variables('factoryId'), '/datasets/SinkDatasetParquet')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Manual Pipeline')]",
+			"name": "[concat(parameters('factoryName'), '/Draft Pipeline')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -1595,6 +1100,502 @@
 				},
 				"annotations": [],
 				"lastPublishTime": "2024-12-26T04:55:41Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/CapatazMetadata')]",
+				"[concat(variables('factoryId'), '/linkedServices/CapatazDBLS')]",
+				"[concat(variables('factoryId'), '/datasets/CapatazDBDataset')]",
+				"[concat(variables('factoryId'), '/datasets/SinkDatasetParquet')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Manual Pipeline with Emailing')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Metadata",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT TableName FROM dbo.MetadataTable WHERE IsActive = 1",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "CapatazMetadata",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Iterate the Tables",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get Metadata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Metadata').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"batchCount": 6,
+							"activities": [
+								{
+									"name": "Start Monitoring",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": "[[dbo].[StartMonitoring]",
+										"storedProcedureParameters": {
+											"PipelineRunID": {
+												"value": {
+													"value": "@pipeline().RunId",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"TableName": {
+												"value": {
+													"value": "@item().TableName",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"Year": {
+												"value": {
+													"value": "@variables('Year')",
+													"type": "Expression"
+												},
+												"type": "Int16"
+											},
+											"Month": {
+												"value": {
+													"value": "@variables('Month')",
+													"type": "Expression"
+												},
+												"type": "Int16"
+											},
+											"Day": {
+												"value": {
+													"value": "@variables('Day')",
+													"type": "Expression"
+												},
+												"type": "Int16"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "CapatazDBLS",
+										"type": "LinkedServiceReference"
+									}
+								},
+								{
+									"name": "SQL Database to ADLS",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "Start Monitoring",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": {
+												"value": "@if(\n    or(\n        equals(item().TableName, 'ProfileTimeKeepingWhosWorkings'),\n        equals(item().TableName, 'ProfileTimeKeepingWhosWorkings.Archive')\n    ),\n    concat(\n        'SELECT * FROM [', item().TableName, '] WITH (NOLOCK) WHERE YEAR([DateTimeInOut]) = ', variables('Year'), \n        ' AND MONTH([DateTimeInOut]) = ', variables('Month'), \n        if(\n            or(\n                or(equals(variables('Day'), null), equals(variables('Day'), '')), \n                equals(variables('Day'), 0)\n            ), \n            '', \n            concat(' AND DAY([DateTimeInOut]) = ', variables('Day'))\n        )\n    ),\n    concat(\n        'SELECT * FROM [', item().TableName, '] WITH (NOLOCK) WHERE YEAR([CreatedDate]) = ', variables('Year'), \n        ' AND MONTH([CreatedDate]) = ', variables('Month'), \n        if(\n            or(\n                or(equals(variables('Day'), null), equals(variables('Day'), '')), \n                equals(variables('Day'), 0)\n            ), \n            '', \n            concat(' AND DAY([CreatedDate]) = ', variables('Day'))\n        )\n    )\n)\n",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "CapatazDBDataset",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "SinkDatasetParquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": {
+													"value": "@concat(\n    variables('Year'), '-', \n    variables('Month'), \n    if(equals(variables('Day'), ''), '', concat('-', variables('Day'))),\n    ' - ', pipeline().RunId, '.parquet'\n)\n",
+													"type": "Expression"
+												},
+												"Directory": {
+													"value": "@concat(item().TableName, '/', variables('Year'), '/', variables('Month'), '/')\n",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "Update Monitoring Table",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [
+										{
+											"activity": "SQL Database to ADLS",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": "[[dbo].[UpdateMonitoring]",
+										"storedProcedureParameters": {
+											"Errors": {
+												"value": {
+													"value": "@activity('SQL Database to ADLS').error",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"RowCountSink": {
+												"value": {
+													"value": "@activity('SQL Database to ADLS').output.rowsCopied",
+													"type": "Expression"
+												},
+												"type": "Int16"
+											},
+											"RowCountSource": {
+												"value": {
+													"value": "@activity('SQL Database to ADLS').output.rowsRead",
+													"type": "Expression"
+												},
+												"type": "Int16"
+											},
+											"TableName": {
+												"value": {
+													"value": "@item().TableName",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"PipelineRunID": {
+												"value": {
+													"value": "@pipeline().RunId",
+													"type": "Expression"
+												}
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "CapatazDBLS",
+										"type": "LinkedServiceReference"
+									}
+								},
+								{
+									"name": "Log Errors",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [
+										{
+											"activity": "SQL Database to ADLS",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": "[[dbo].[LogError]",
+										"storedProcedureParameters": {
+											"Errors": {
+												"value": {
+													"value": "@concat('Errors: ', string(activity('SQL Database to ADLS').output.errors))\n",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"TableName": {
+												"value": {
+													"value": "@item().TableName",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"PipelineRunID": {
+												"value": {
+													"value": "@pipeline().RunId",
+													"type": "Expression"
+												}
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "CapatazDBLS",
+										"type": "LinkedServiceReference"
+									}
+								},
+								{
+									"name": "If Condition for Data Validation",
+									"type": "IfCondition",
+									"dependsOn": [
+										{
+											"activity": "Update Monitoring Table",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@equals(variables('RowCountSource'), variables('RowCountSink'))",
+											"type": "Expression"
+										},
+										"ifFalseActivities": [
+											{
+												"name": "Fail Activity",
+												"type": "Fail",
+												"dependsOn": [],
+												"userProperties": [],
+												"typeProperties": {
+													"message": {
+														"value": "Row count mismatch detected. Source row count: @{variables('RowCountSource')}, Sink row count: @{variables('RowCountSink')}.\n",
+														"type": "Expression"
+													},
+													"errorCode": {
+														"value": "RowCountMismatch",
+														"type": "Expression"
+													}
+												}
+											}
+										],
+										"ifTrueActivities": [
+											{
+												"name": "Delete Archived Data",
+												"type": "SqlServerStoredProcedure",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"storedProcedureName": "[[dbo].[DeleteArchivedData]",
+													"storedProcedureParameters": {
+														"Day": {
+															"value": {
+																"value": "@variables('Day')",
+																"type": "Expression"
+															},
+															"type": "Int16"
+														},
+														"Month": {
+															"value": {
+																"value": "@variables('Month')",
+																"type": "Expression"
+															},
+															"type": "Int16"
+														},
+														"PipelineRunID": {
+															"value": {
+																"value": "@pipeline().RunId",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"Year": {
+															"value": {
+																"value": "@variables('Year')",
+																"type": "Expression"
+															},
+															"type": "Int16"
+														}
+													}
+												},
+												"linkedServiceName": {
+													"referenceName": "CapatazDBLS",
+													"type": "LinkedServiceReference"
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "Send Email",
+									"type": "WebActivity",
+									"dependsOn": [
+										{
+											"activity": "RowCountDeleted Value",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"method": "POST",
+										"headers": {},
+										"url": "https://prod-09.southeastasia.logic.azure.com:443/workflows/2165d75dbf544f4bac16eea2a4046fc0/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=ZS_KkiU12DYTIxQ5cYi5QgSt53TuW5l9j0x1stp6Q_Y",
+										"body": {
+											"value": "{\n    \"TableName\": \"@{item().TableName}\",\n    \"RunId\": \"@{pipeline().RunId}\",\n    \"RowsRead\": \"@{activity('SQL Database to ADLS').output.rowsRead}\",\n    \"RowsCopied\": \"@{activity('SQL Database to ADLS').output.rowsCopied}\",\n    \"RowCountDeleted\": \"@{activity('RowCountDeleted Value').output.firstRow.RowCountDeleted}\",\n    \"Year\": \"@{variables('Year')}\",\n    \"Month\": \"@{variables('Month')}\",\n    \"Day\": \"@{variables('Day')}\",\n    \"TriggerTime\": \"@{pipeline().TriggerTime}\"\n}\n",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "RowCountDeleted Value",
+									"type": "Lookup",
+									"dependsOn": [
+										{
+											"activity": "If Condition for Data Validation",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": {
+												"value": "SELECT RowCountDeleted\nFROM dbo.ArchivalMonitoring\nWHERE TableName = '@{item().TableName}'\n  AND PipelineRunID = '@{pipeline().RunId}'",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "CapatazDBDataset",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"MetadataTableName": {
+						"type": "string",
+						"defaultValue": "dbo.MetadataTable"
+					}
+				},
+				"variables": {
+					"RowCountSource": {
+						"type": "String",
+						"defaultValue": "0"
+					},
+					"RowCountSink": {
+						"type": "String",
+						"defaultValue": "0"
+					},
+					"Year": {
+						"type": "Integer",
+						"defaultValue": 2022
+					},
+					"Month": {
+						"type": "Integer",
+						"defaultValue": 6
+					},
+					"Day": {
+						"type": "Integer",
+						"defaultValue": 1
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-12-28T05:58:24Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/CapatazMetadata')]",
