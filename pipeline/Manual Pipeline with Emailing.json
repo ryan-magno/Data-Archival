@@ -131,7 +131,7 @@
 								"source": {
 									"type": "AzureSqlSource",
 									"sqlReaderQuery": {
-										"value": "@if( \n    equals(item().TableName, 'ProfileTimeKeepingWhosWorkings'),\n    concat(\n        'SELECT * FROM [', item().TableName, '] WITH (NOLOCK) WHERE YEAR([DateTimeInOut]) = ', variables('Year'), \n        ' AND MONTH([DateTimeInOut]) = ', variables('Month'), \n        if(or(or(equals(variables('Day'), null), equals(variables('Day'), '')), equals(variables('Day'), 0)), '', concat(' AND DAY([DateTimeInOut]) = ', variables('Day')))\n    ),\n    concat(\n        'SELECT * FROM [', item().TableName, '] WITH (NOLOCK) WHERE YEAR([CreatedDate]) = ', variables('Year'), \n        ' AND MONTH([CreatedDate]) = ', variables('Month'), \n        if(or(or(equals(variables('Day'), null), equals(variables('Day'), '')), equals(variables('Day'), 0)), '', concat(' AND DAY([CreatedDate]) = ', variables('Day')))\n    )\n)",
+										"value": "@if(\n    or(\n        equals(item().TableName, 'ProfileTimeKeepingWhosWorkings'),\n        equals(item().TableName, 'ProfileTimeKeepingWhosWorkings.Archive')\n    ),\n    concat(\n        'SELECT * FROM [', item().TableName, '] WITH (NOLOCK) WHERE YEAR([DateTimeInOut]) = ', variables('Year'), \n        ' AND MONTH([DateTimeInOut]) = ', variables('Month'), \n        if(\n            or(\n                or(equals(variables('Day'), null), equals(variables('Day'), '')), \n                equals(variables('Day'), 0)\n            ), \n            '', \n            concat(' AND DAY([DateTimeInOut]) = ', variables('Day'))\n        )\n    ),\n    concat(\n        'SELECT * FROM [', item().TableName, '] WITH (NOLOCK) WHERE YEAR([CreatedDate]) = ', variables('Year'), \n        ' AND MONTH([CreatedDate]) = ', variables('Month'), \n        if(\n            or(\n                or(equals(variables('Day'), null), equals(variables('Day'), '')), \n                equals(variables('Day'), 0)\n            ), \n            '', \n            concat(' AND DAY([CreatedDate]) = ', variables('Day'))\n        )\n    )\n)\n",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
@@ -464,14 +464,15 @@
 			},
 			"Year": {
 				"type": "Integer",
-				"defaultValue": 2024
+				"defaultValue": 2022
 			},
 			"Month": {
 				"type": "Integer",
 				"defaultValue": 6
 			},
 			"Day": {
-				"type": "Integer"
+				"type": "Integer",
+				"defaultValue": 1
 			}
 		},
 		"annotations": [],
