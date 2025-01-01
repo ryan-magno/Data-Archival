@@ -62,6 +62,8 @@
 						{
 							"name": "Start Monitoring",
 							"type": "SqlServerStoredProcedure",
+							"state": "Inactive",
+							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [],
 							"policy": {
 								"timeout": "0.12:00:00",
@@ -207,7 +209,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"storedProcedureName": "[dbo].[UpdateMonitoring]",
+								"storedProcedureName": "[dbo].[ManageMonitoring]",
 								"storedProcedureParameters": {
 									"Errors": {
 										"value": {
@@ -243,6 +245,24 @@
 											"type": "Expression"
 										},
 										"type": "String"
+									},
+									"Year": {
+										"value": "@item().ArchivalYear",
+										"type": "Int16"
+									},
+									"Month": {
+										"value": {
+											"value": "@item().ArchivalMonth",
+											"type": "Expression"
+										},
+										"type": "Int16"
+									},
+									"Day": {
+										"value": {
+											"value": "@item().ArchivalDay",
+											"type": "Expression"
+										},
+										"type": "Int16"
 									}
 								}
 							},
