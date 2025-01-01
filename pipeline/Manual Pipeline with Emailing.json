@@ -430,7 +430,10 @@
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "AuditData",
-								"value": "@concat(variables('AuditData'), [\n  {\n    \"TableName\": \"@{item().TableName}\",\n    \"RowsRead\": \"@{activity('SQL Database to ADLS').output.rowsRead}\",\n    \"RowsCopied\": \"@{activity('SQL Database to ADLS').output.rowsCopied}\",\n    \"RowCountDeleted\": \"@{activity('RowCountDeleted Value and Errors').output.firstRow.RowCountDeleted}\",\n    \"Errors\": \"@{activity('RowCountDeleted Value and Errors').output.firstRow.Errors}\",\n    \"Year\": \"@{variables('Year')}\",\n    \"Month\": \"@{variables('Month')}\",\n    \"Day\": \"@{variables('Day')}\",\n    \"TriggerTime\": \"@{formatDateTime(addHours(pipeline().TriggerTime, 8), 'yyyy-MM-ddTHH:mm:ssZ')}\"\n  }\n])\n"
+								"value": {
+									"value": "@concat(variables('AuditData'), [\n  {\n    \"TableName\": \"@{item().TableName}\",\n    \"RowsRead\": \"@{activity('SQL Database to ADLS').output.rowsRead}\",\n    \"RowsCopied\": \"@{activity('SQL Database to ADLS').output.rowsCopied}\",\n    \"RowCountDeleted\": \"@{activity('RowCountDeleted Value and Errors').output.firstRow.RowCountDeleted}\",\n    \"Errors\": \"@{activity('RowCountDeleted Value and Errors').output.firstRow.Errors}\",\n    \"Year\": \"@{variables('Year')}\",\n    \"Month\": \"@{variables('Month')}\",\n    \"Day\": \"@{variables('Day')}\",\n    \"TriggerTime\": \"@{formatDateTime(addHours(pipeline().TriggerTime, 8), 'yyyy-MM-ddTHH:mm:ssZ')}\"\n  }\n])\n",
+									"type": "Expression"
+								}
 							}
 						}
 					]
