@@ -245,6 +245,8 @@
 								{
 									"name": "Start Monitoring",
 									"type": "SqlServerStoredProcedure",
+									"state": "Inactive",
+									"onInactiveMarkAs": "Succeeded",
 									"dependsOn": [],
 									"policy": {
 										"timeout": "0.12:00:00",
@@ -391,7 +393,7 @@
 									},
 									"userProperties": [],
 									"typeProperties": {
-										"storedProcedureName": "[[dbo].[UpdateMonitoring]",
+										"storedProcedureName": "[[dbo].[ManageMonitoring]",
 										"storedProcedureParameters": {
 											"Errors": {
 												"value": {
@@ -427,6 +429,27 @@
 													"type": "Expression"
 												},
 												"type": "String"
+											},
+											"Year": {
+												"value": {
+													"value": "@item().ArchivalYear",
+													"type": "Expression"
+												},
+												"type": "Int16"
+											},
+											"Month": {
+												"value": {
+													"value": "@item().ArchivalMonth",
+													"type": "Expression"
+												},
+												"type": "Int16"
+											},
+											"Day": {
+												"value": {
+													"value": "@item().ArchivalDay",
+													"type": "Expression"
+												},
+												"type": "Int16"
 											}
 										}
 									},
@@ -1130,6 +1153,8 @@
 								{
 									"name": "Start Monitoring",
 									"type": "SqlServerStoredProcedure",
+									"state": "Inactive",
+									"onInactiveMarkAs": "Succeeded",
 									"dependsOn": [],
 									"policy": {
 										"timeout": "0.12:00:00",
@@ -1276,7 +1301,7 @@
 									},
 									"userProperties": [],
 									"typeProperties": {
-										"storedProcedureName": "[[dbo].[UpdateMonitoring]",
+										"storedProcedureName": "[[dbo].[ManageMonitoring]",
 										"storedProcedureParameters": {
 											"Errors": {
 												"value": {
@@ -1310,7 +1335,29 @@
 												"value": {
 													"value": "@pipeline().RunId",
 													"type": "Expression"
-												}
+												},
+												"type": "String"
+											},
+											"Year": {
+												"value": {
+													"value": "@variables('Year')",
+													"type": "Expression"
+												},
+												"type": "Int16"
+											},
+											"Month": {
+												"value": {
+													"value": "@variables('Month')",
+													"type": "Expression"
+												},
+												"type": "Int16"
+											},
+											"Day": {
+												"value": {
+													"value": "@variables('Day')",
+													"type": "Expression"
+												},
+												"type": "Int16"
 											}
 										}
 									},
@@ -1578,7 +1625,7 @@
 					},
 					"Day": {
 						"type": "Integer",
-						"defaultValue": 9
+						"defaultValue": 10
 					}
 				},
 				"annotations": [],
