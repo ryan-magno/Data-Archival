@@ -395,21 +395,21 @@
 									"typeProperties": {
 										"storedProcedureName": "[[dbo].[ManageMonitoring]",
 										"storedProcedureParameters": {
-											"Errors": {
+											"Remarks": {
 												"value": {
 													"value": "@activity('SQL Database to ADLS').error",
 													"type": "Expression"
 												},
 												"type": "String"
 											},
-											"RowCountSink": {
+											"Read": {
 												"value": {
 													"value": "@activity('SQL Database to ADLS').output.rowsCopied",
 													"type": "Expression"
 												},
 												"type": "Int16"
 											},
-											"RowCountSource": {
+											"Write": {
 												"value": {
 													"value": "@activity('SQL Database to ADLS').output.rowsRead",
 													"type": "Expression"
@@ -498,7 +498,8 @@
 												"value": {
 													"value": "@pipeline().RunId",
 													"type": "Expression"
-												}
+												},
+												"type": "String"
 											}
 										}
 									},
@@ -521,7 +522,7 @@
 									"userProperties": [],
 									"typeProperties": {
 										"expression": {
-											"value": "@equals(variables('RowCountSource'), variables('RowCountSink'))",
+											"value": "@equals(variables('Read'), variables('Write'))",
 											"type": "Expression"
 										},
 										"ifFalseActivities": [
@@ -532,7 +533,7 @@
 												"userProperties": [],
 												"typeProperties": {
 													"message": {
-														"value": "Row count mismatch detected. Source row count: @{variables('RowCountSource')}, Sink row count: @{variables('RowCountSink')}.\n",
+														"value": "Row count mismatch detected. Source row count: @{variables('Read')}, Sink row count: @{variables('Write')}.\n",
 														"type": "Expression"
 													},
 													"errorCode": {
@@ -659,15 +660,15 @@
 					}
 				},
 				"variables": {
-					"RowCountSource": {
+					"Read": {
 						"type": "String",
 						"defaultValue": "0"
 					},
-					"RowCountSink": {
+					"Write": {
 						"type": "String",
 						"defaultValue": "0"
 					},
-					"RowCountDeleted": {
+					"Deleted": {
 						"type": "Integer"
 					}
 				},
@@ -1095,7 +1096,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/Manual Pipeline with Emailing')]",
+			"name": "[concat(parameters('factoryName'), '/Manual Pipeline')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -1303,21 +1304,21 @@
 									"typeProperties": {
 										"storedProcedureName": "[[dbo].[ManageMonitoring]",
 										"storedProcedureParameters": {
-											"Errors": {
+											"Remarks": {
 												"value": {
 													"value": "@activity('SQL Database to ADLS').error",
 													"type": "Expression"
 												},
 												"type": "String"
 											},
-											"RowCountSink": {
+											"Write": {
 												"value": {
 													"value": "@activity('SQL Database to ADLS').output.rowsCopied",
 													"type": "Expression"
 												},
 												"type": "Int16"
 											},
-											"RowCountSource": {
+											"Read": {
 												"value": {
 													"value": "@activity('SQL Database to ADLS').output.rowsRead",
 													"type": "Expression"
@@ -1388,7 +1389,7 @@
 									"typeProperties": {
 										"storedProcedureName": "[[dbo].[LogError]",
 										"storedProcedureParameters": {
-											"Errors": {
+											"Remarks": {
 												"value": {
 													"value": "@concat('Errors: ', string(activity('SQL Database to ADLS').output.errors))\n",
 													"type": "Expression"
@@ -1429,7 +1430,7 @@
 									"userProperties": [],
 									"typeProperties": {
 										"expression": {
-											"value": "@equals(variables('RowCountSource'), variables('RowCountSink'))",
+											"value": "@equals(variables('Read'), variables('Write'))",
 											"type": "Expression"
 										},
 										"ifFalseActivities": [
@@ -1440,7 +1441,7 @@
 												"userProperties": [],
 												"typeProperties": {
 													"message": {
-														"value": "Row count mismatch detected. Source row count: @{variables('RowCountSource')}, Sink row count: @{variables('RowCountSink')}.\n",
+														"value": "Row count mismatch detected. Source row count: @{variables('Read')}, Sink row count: @{variables('Write')}.\n",
 														"type": "Expression"
 													},
 													"errorCode": {
@@ -1607,11 +1608,11 @@
 					}
 				},
 				"variables": {
-					"RowCountSource": {
+					"Read": {
 						"type": "String",
 						"defaultValue": "0"
 					},
-					"RowCountSink": {
+					"Write": {
 						"type": "String",
 						"defaultValue": "0"
 					},
@@ -1625,7 +1626,7 @@
 					},
 					"Day": {
 						"type": "Integer",
-						"defaultValue": 10
+						"defaultValue": 16
 					}
 				},
 				"annotations": [],
