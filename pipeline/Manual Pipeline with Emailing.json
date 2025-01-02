@@ -239,7 +239,10 @@
 										"type": "String"
 									},
 									"Year": {
-										"value": "@variables('Year')",
+										"value": {
+											"value": "@variables('Year')",
+											"type": "Expression"
+										},
 										"type": "Int16"
 									},
 									"Month": {
