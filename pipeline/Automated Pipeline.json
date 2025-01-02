@@ -211,21 +211,21 @@
 							"typeProperties": {
 								"storedProcedureName": "[dbo].[ManageMonitoring]",
 								"storedProcedureParameters": {
-									"Errors": {
+									"Remarks": {
 										"value": {
 											"value": "@activity('SQL Database to ADLS').error",
 											"type": "Expression"
 										},
 										"type": "String"
 									},
-									"RowCountSink": {
+									"Read": {
 										"value": {
 											"value": "@activity('SQL Database to ADLS').output.rowsCopied",
 											"type": "Expression"
 										},
 										"type": "Int16"
 									},
-									"RowCountSource": {
+									"Write": {
 										"value": {
 											"value": "@activity('SQL Database to ADLS').output.rowsRead",
 											"type": "Expression"
@@ -247,7 +247,10 @@
 										"type": "String"
 									},
 									"Year": {
-										"value": "@item().ArchivalYear",
+										"value": {
+											"value": "@item().ArchivalYear",
+											"type": "Expression"
+										},
 										"type": "Int16"
 									},
 									"Month": {
@@ -311,7 +314,8 @@
 										"value": {
 											"value": "@pipeline().RunId",
 											"type": "Expression"
-										}
+										},
+										"type": "String"
 									}
 								}
 							},
@@ -334,7 +338,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"expression": {
-									"value": "@equals(variables('RowCountSource'), variables('RowCountSink'))",
+									"value": "@equals(variables('Read'), variables('Write'))",
 									"type": "Expression"
 								},
 								"ifFalseActivities": [
@@ -345,7 +349,7 @@
 										"userProperties": [],
 										"typeProperties": {
 											"message": {
-												"value": "Row count mismatch detected. Source row count: @{variables('RowCountSource')}, Sink row count: @{variables('RowCountSink')}.\n",
+												"value": "Row count mismatch detected. Source row count: @{variables('Read')}, Sink row count: @{variables('Write')}.\n",
 												"type": "Expression"
 											},
 											"errorCode": {
@@ -468,15 +472,15 @@
 			}
 		},
 		"variables": {
-			"RowCountSource": {
+			"Read": {
 				"type": "String",
 				"defaultValue": "0"
 			},
-			"RowCountSink": {
+			"Write": {
 				"type": "String",
 				"defaultValue": "0"
 			},
-			"RowCountDeleted": {
+			"Deleted": {
 				"type": "Integer"
 			}
 		},
