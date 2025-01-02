@@ -474,7 +474,7 @@
 							"storedProcedureName": "[[dbo].[UpdateMetadata]",
 							"storedProcedureParameters": {
 								"RetentionMonth": {
-									"value": "2",
+									"value": "3",
 									"type": "Int16"
 								}
 							}
