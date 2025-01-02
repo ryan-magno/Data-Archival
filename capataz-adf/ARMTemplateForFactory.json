@@ -1139,7 +1139,7 @@
 													"type": "Expression"
 												},
 												"Directory": {
-													"value": "@concat(item().TableName, '/', variables('Year'), '/', variables('Month'), '/')\n",
+													"value": "@concat(replace(item().TableName, '.Archive', ''), '/', variables('Month'), '/')",
 													"type": "Expression"
 												}
 											}
@@ -1490,7 +1490,7 @@
 					},
 					"Day": {
 						"type": "Integer",
-						"defaultValue": 16
+						"defaultValue": 18
 					}
 				},
 				"annotations": [],
