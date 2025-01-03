@@ -178,7 +178,7 @@
 											"type": "Expression"
 										},
 										"Directory": {
-											"value": "@concat(replace(item().TableName, '.Archive', ''), '/', item().ArchivalYear, '/', item().ArchivalMonth, '/')\n",
+											"value": "@concat(replace(item().TableName, '.Archived', ''), '/', item().ArchivalYear, '/', item().ArchivalMonth, '/')\n",
 											"type": "Expression"
 										}
 									}

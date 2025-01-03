@@ -170,7 +170,7 @@
 											"type": "Expression"
 										},
 										"Directory": {
-											"value": "@concat(replace(item().TableName, '.Archive', ''), '/', variables('Month'), '/')",
+											"value": "@concat(replace(item().TableName, '.Archived', ''), '/', variables('Month'), '/')",
 											"type": "Expression"
 										}
 									}
@@ -263,7 +263,7 @@
 							}
 						},
 						{
-							"name": "Log Errors",
+							"name": "Log Copy Errors",
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [
 								{
@@ -396,6 +396,55 @@
 											"referenceName": "CapatazDBLinkedService",
 											"type": "LinkedServiceReference"
 										}
+									},
+									{
+										"name": "Log Deletion Errors",
+										"type": "SqlServerStoredProcedure",
+										"dependsOn": [
+											{
+												"activity": "Delete Archived Data",
+												"dependencyConditions": [
+													"Failed"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 3,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"storedProcedureName": "[dbo].[LogError]",
+											"storedProcedureParameters": {
+												"Remarks": {
+													"value": {
+														"value": "@concat('Errors: ', string(activity('Start Monitoring').output.errors))\n\n",
+														"type": "Expression"
+													},
+													"type": "String"
+												},
+												"TableName": {
+													"value": {
+														"value": "@item().TableName",
+														"type": "Expression"
+													},
+													"type": "String"
+												},
+												"PipelineRunID": {
+													"value": {
+														"value": "@pipeline().RunId",
+														"type": "Expression"
+													}
+												}
+											}
+										},
+										"linkedServiceName": {
+											"referenceName": "CapatazDBLinkedService",
+											"type": "LinkedServiceReference"
+										}
 									}
 								]
 							}
@@ -462,7 +511,7 @@
 					{
 						"activity": "Iterate the Tables",
 						"dependencyConditions": [
-							"Succeeded"
+							"Completed"
 						]
 					}
 				],
@@ -511,8 +560,7 @@
 				"defaultValue": 6
 			},
 			"Day": {
-				"type": "Integer",
-				"defaultValue": 22
+				"type": "Integer"
 			}
 		},
 		"annotations": [],
