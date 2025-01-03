@@ -1,5 +1,5 @@
 {
-	"name": "CapatazDBDataset",
+	"name": "CapatazDB",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "CapatazDB",

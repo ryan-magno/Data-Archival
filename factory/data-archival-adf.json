@@ -1,0 +1,14 @@
+{
+	"name": "data-archival-adf",
+	"properties": {
+		"globalConfigurations": {
+			"PipelineBillingEnabled": "false"
+		}
+	},
+	"location": "southeastasia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "7f2d3d6b-908f-4c6c-b5ae-d76d957453da",
+		"tenantId": "84c31ca0-ac3b-4eae-ad11-519d80233e6f"
+	}
+}

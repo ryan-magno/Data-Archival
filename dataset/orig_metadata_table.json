@@ -1,9 +1,12 @@
 {
-	"name": "CapatazMetadata",
+	"name": "orig_metadata_table",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "CapatazDB",
+			"referenceName": "orig_capataz_ls",
 			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "with-constraint"
 		},
 		"annotations": [],
 		"type": "AzureSqlTable",
@@ -15,11 +18,6 @@
 			{
 				"name": "IsActive",
 				"type": "bit"
-			},
-			{
-				"name": "ArchiveSequence",
-				"type": "int",
-				"precision": 10
 			},
 			{
 				"name": "MinCreatedDate",

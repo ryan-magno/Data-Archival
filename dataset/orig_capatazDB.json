@@ -1,9 +1,12 @@
 {
-	"name": "CapatazDBDataset",
+	"name": "orig_capatazDB",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "CapatazDB",
+			"referenceName": "orig_capataz_ls",
 			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "with-constraint"
 		},
 		"annotations": [],
 		"type": "AzureSqlTable",

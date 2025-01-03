@@ -2,7 +2,7 @@
 	"name": "SinkDatasetParquet",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "CapatazDataLake",
+			"referenceName": "datalake_ls",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
