@@ -156,7 +156,7 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "CapatazDBDataset",
+									"referenceName": "CapatazDB",
 									"type": "DatasetReference"
 								}
 							],
@@ -256,6 +256,10 @@
 										"type": "Int16"
 									}
 								}
+							},
+							"linkedServiceName": {
+								"referenceName": "CapatazDBLinkedService",
+								"type": "LinkedServiceReference"
 							}
 						},
 						{
@@ -301,6 +305,10 @@
 										}
 									}
 								}
+							},
+							"linkedServiceName": {
+								"referenceName": "CapatazDBLinkedService",
+								"type": "LinkedServiceReference"
 							}
 						},
 						{
@@ -383,6 +391,10 @@
 													"type": "Int16"
 												}
 											}
+										},
+										"linkedServiceName": {
+											"referenceName": "CapatazDBLinkedService",
+											"type": "LinkedServiceReference"
 										}
 									}
 								]
@@ -411,10 +423,6 @@
 									},
 									"queryTimeout": "02:00:00",
 									"partitionOption": "None"
-								},
-								"dataset": {
-									"referenceName": "CapatazDBDataset",
-									"type": "DatasetReference"
 								}
 							}
 						},

@@ -264,6 +264,10 @@
 										"type": "Int16"
 									}
 								}
+							},
+							"linkedServiceName": {
+								"referenceName": "CapatazDBLinkedService",
+								"type": "LinkedServiceReference"
 							}
 						},
 						{
@@ -310,6 +314,10 @@
 										"type": "String"
 									}
 								}
+							},
+							"linkedServiceName": {
+								"referenceName": "CapatazDBLinkedService",
+								"type": "LinkedServiceReference"
 							}
 						},
 						{
@@ -392,6 +400,10 @@
 													"type": "Int16"
 												}
 											}
+										},
+										"linkedServiceName": {
+											"referenceName": "CapatazDBLinkedService",
+											"type": "LinkedServiceReference"
 										}
 									}
 								]
