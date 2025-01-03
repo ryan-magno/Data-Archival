@@ -1,10 +1,6 @@
 {
 	"name": "SinkDatasetParquet",
 	"properties": {
-		"linkedServiceName": {
-			"referenceName": "datalake_ls",
-			"type": "LinkedServiceReference"
-		},
 		"parameters": {
 			"FileName": {
 				"type": "string"

@@ -1,10 +1,6 @@
 {
 	"name": "CapatazMetadata",
 	"properties": {
-		"linkedServiceName": {
-			"referenceName": "CapatazDB",
-			"type": "LinkedServiceReference"
-		},
 		"annotations": [],
 		"type": "AzureSqlTable",
 		"schema": [
