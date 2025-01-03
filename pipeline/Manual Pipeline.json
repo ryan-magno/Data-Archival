@@ -262,7 +262,7 @@
 								}
 							},
 							"linkedServiceName": {
-								"referenceName": "CapatazDBLS",
+								"referenceName": "CapatazDB",
 								"type": "LinkedServiceReference"
 							}
 						},
@@ -311,7 +311,7 @@
 								}
 							},
 							"linkedServiceName": {
-								"referenceName": "CapatazDBLS",
+								"referenceName": "CapatazDB",
 								"type": "LinkedServiceReference"
 							}
 						},
@@ -397,7 +397,7 @@
 											}
 										},
 										"linkedServiceName": {
-											"referenceName": "CapatazDBLS",
+											"referenceName": "CapatazDB",
 											"type": "LinkedServiceReference"
 										}
 									}
@@ -520,7 +520,7 @@
 			},
 			"Day": {
 				"type": "Integer",
-				"defaultValue": 18
+				"defaultValue": 19
 			}
 		},
 		"annotations": [],

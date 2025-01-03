@@ -168,7 +168,7 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "CapatazDBDataset",
+									"referenceName": "CapatazDB",
 									"type": "DatasetReference"
 								}
 							],
@@ -270,7 +270,7 @@
 								}
 							},
 							"linkedServiceName": {
-								"referenceName": "CapatazDBLS",
+								"referenceName": "CapatazDB",
 								"type": "LinkedServiceReference"
 							}
 						},
@@ -320,7 +320,7 @@
 								}
 							},
 							"linkedServiceName": {
-								"referenceName": "CapatazDBLS",
+								"referenceName": "CapatazDB",
 								"type": "LinkedServiceReference"
 							}
 						},
@@ -406,7 +406,7 @@
 											}
 										},
 										"linkedServiceName": {
-											"referenceName": "CapatazDBLS",
+											"referenceName": "CapatazDB",
 											"type": "LinkedServiceReference"
 										}
 									}
@@ -438,7 +438,7 @@
 					}
 				},
 				"linkedServiceName": {
-					"referenceName": "CapatazDBLS",
+					"referenceName": "CapatazDB",
 					"type": "LinkedServiceReference"
 				}
 			},
@@ -449,7 +449,7 @@
 					{
 						"activity": "Iterate the Tables",
 						"dependencyConditions": [
-							"Succeeded"
+							"Completed"
 						]
 					}
 				],
