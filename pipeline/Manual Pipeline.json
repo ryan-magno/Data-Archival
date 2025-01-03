@@ -353,7 +353,7 @@
 										"dependsOn": [],
 										"policy": {
 											"timeout": "0.12:00:00",
-											"retry": 3,
+											"retry": 0,
 											"retryIntervalInSeconds": 30,
 											"secureOutput": false,
 											"secureInput": false
@@ -410,7 +410,7 @@
 										],
 										"policy": {
 											"timeout": "0.12:00:00",
-											"retry": 3,
+											"retry": 0,
 											"retryIntervalInSeconds": 30,
 											"secureOutput": false,
 											"secureInput": false
@@ -421,7 +421,7 @@
 											"storedProcedureParameters": {
 												"Remarks": {
 													"value": {
-														"value": "@concat('Errors: ', string(activity('Start Monitoring').output.errors))\n\n",
+														"value": "@concat('Errors: ', string(activity('Delete Archived Data').output.message))\n\n",
 														"type": "Expression"
 													},
 													"type": "String"
@@ -437,7 +437,8 @@
 													"value": {
 														"value": "@pipeline().RunId",
 														"type": "Expression"
-													}
+													},
+													"type": "String"
 												}
 											}
 										},
@@ -553,11 +554,11 @@
 			},
 			"Year": {
 				"type": "Integer",
-				"defaultValue": 2022
+				"defaultValue": 2024
 			},
 			"Month": {
 				"type": "Integer",
-				"defaultValue": 6
+				"defaultValue": 4
 			},
 			"Day": {
 				"type": "Integer"

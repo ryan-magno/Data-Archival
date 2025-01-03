@@ -271,7 +271,7 @@
 							}
 						},
 						{
-							"name": "Log Errors",
+							"name": "Log Copy Errors",
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [
 								{
@@ -398,6 +398,56 @@
 														"type": "Expression"
 													},
 													"type": "Int16"
+												}
+											}
+										},
+										"linkedServiceName": {
+											"referenceName": "CapatazDBLinkedService",
+											"type": "LinkedServiceReference"
+										}
+									},
+									{
+										"name": "Log Deletion Errors",
+										"type": "SqlServerStoredProcedure",
+										"dependsOn": [
+											{
+												"activity": "Delete Archived Data",
+												"dependencyConditions": [
+													"Failed"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 3,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"storedProcedureName": "[dbo].[LogError]",
+											"storedProcedureParameters": {
+												"Errors": {
+													"value": {
+														"value": "@concat('Errors: ', string(activity('Delete Archived Data').output.message))\n",
+														"type": "Expression"
+													},
+													"type": "String"
+												},
+												"TableName": {
+													"value": {
+														"value": "@item().TableName",
+														"type": "Expression"
+													},
+													"type": "String"
+												},
+												"PipelineRunID": {
+													"value": {
+														"value": "@pipeline().RunId",
+														"type": "Expression"
+													},
+													"type": "String"
 												}
 											}
 										},
