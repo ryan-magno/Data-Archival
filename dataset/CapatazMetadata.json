@@ -1,6 +1,10 @@
 {
 	"name": "CapatazMetadata",
 	"properties": {
+		"linkedServiceName": {
+			"referenceName": "CapatazDBLinkedService",
+			"type": "LinkedServiceReference"
+		},
 		"annotations": [],
 		"type": "AzureSqlTable",
 		"schema": [
@@ -27,11 +31,7 @@
 				"type": "datetime2",
 				"scale": 7
 			}
-		],
-		"typeProperties": {
-			"schema": "dbo",
-			"table": "MetadataTable"
-		}
+		]
 	},
 	"type": "Microsoft.DataFactory/factories/datasets"
 }
