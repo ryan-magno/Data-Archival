@@ -543,7 +543,7 @@
 					{
 						"activity": "Iterate the Tables",
 						"dependencyConditions": [
-							"Succeeded"
+							"Completed"
 						]
 					}
 				],
@@ -597,7 +597,7 @@
 			},
 			"Day": {
 				"type": "Integer",
-				"defaultValue": 26
+				"defaultValue": 30
 			}
 		},
 		"annotations": [],
