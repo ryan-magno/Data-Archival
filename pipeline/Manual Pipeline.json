@@ -531,7 +531,7 @@
 						"type": "Expression"
 					},
 					"body": {
-						"value": "{\n    \"PipelineRunID\": \"@{pipeline().RunId}\",\n    \"ReadSum\": \"@{activity('Email Contents').output.firstRow.ReadSum}\",\n    \"WriteSum\": \"@{activity('Email Contents').output.firstRow.WriteSum}\",\n    \"RemainingSum\": \"@{activity('Email Contents').output.firstRow.RemainingSum}\",\n    \"DatabaseName\": \"@{activity('Email Contents').output.firstRow.DatabaseName}\",\n    \"Year\": \"@{activity('Email Contents').output.firstRow.Year}\",\n    \"Month\": \"@{activity('Email Contents').output.firstRow.MonthName}\",\n    \"Day\": \"@{activity('Email Contents').output.firstRow.Day}\",\n    \"Status\": \"@{activity('Email Contents').output.firstRow.Status}\",\n    \"Remarks\": \"@{activity('Email Contents').output.firstRow.Remarks}\",\n    \"DateToday\": \"@{activity('Email Contents').output.firstRow.DateToday}\"\n}\n",
+						"value": "{\n    \"PipelineRunID\": \"@{pipeline().RunId}\",\n    \"ReadSum\": \"@{activity('Email Contents').output.firstRow.ReadSum}\",\n    \"WriteSum\": \"@{activity('Email Contents').output.firstRow.WriteSum}\",\n    \"RemainingSum\": \"@{activity('Email Contents').output.firstRow.RemainingSum}\",\n    \"DatabaseName\": \"@{activity('Email Contents').output.firstRow.DatabaseName}\",\n    \"Year\": \"@{activity('Email Contents').output.firstRow.Year}\",\n    \"Month\": \"@{activity('Email Contents').output.firstRow.MonthName}\",\n    \"Day\": \"@{activity('Email Contents').output.firstRow.Day}\",\n    \"Status\": \"@{activity('Email Contents').output.firstRow.FinalStatus}\",\n    \"Remarks\": \"@{activity('Email Contents').output.firstRow.Remarks}\",\n    \"DateToday\": \"@{activity('Email Contents').output.firstRow.DateToday}\"\n}\n",
 						"type": "Expression"
 					}
 				}
@@ -597,7 +597,7 @@
 			},
 			"Day": {
 				"type": "Integer",
-				"defaultValue": 11
+				"defaultValue": 15
 			}
 		},
 		"annotations": [],
