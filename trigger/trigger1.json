@@ -6,7 +6,7 @@
 		"pipelines": [
 			{
 				"pipelineReference": {
-					"referenceName": "Automated Pipeline",
+					"referenceName": "Automated Pipeline Old",
 					"type": "PipelineReference"
 				}
 			}
