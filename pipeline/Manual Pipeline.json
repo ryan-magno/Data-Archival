@@ -614,11 +614,10 @@
 			},
 			"Month": {
 				"type": "Integer",
-				"defaultValue": 5
+				"defaultValue": 6
 			},
 			"Day": {
-				"type": "Integer",
-				"defaultValue": 15
+				"type": "Integer"
 			}
 		},
 		"annotations": [],
