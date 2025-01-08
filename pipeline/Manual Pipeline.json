@@ -49,7 +49,7 @@
 						"type": "Expression"
 					},
 					"isSequential": false,
-					"batchCount": 2,
+					"batchCount": 6,
 					"activities": [
 						{
 							"name": "Start Monitoring",
@@ -197,7 +197,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"storedProcedureName": "[dbo].[ManageMonitoring]",
+								"storedProcedureName": "[dbo].[UpdateMonitoring]",
 								"storedProcedureParameters": {
 									"Remarks": {
 										"value": {
@@ -404,7 +404,7 @@
 					{
 						"activity": "If Condition for Data Validation",
 						"dependencyConditions": [
-							"Succeeded"
+							"Completed"
 						]
 					}
 				],
@@ -437,7 +437,7 @@
 				"type": "IfCondition",
 				"dependsOn": [
 					{
-						"activity": "Iterate the Tables",
+						"activity": "Sum of Rows Read and Copied",
 						"dependencyConditions": [
 							"Completed"
 						]
@@ -446,7 +446,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@equals(variables('Read'), variables('Write'))",
+						"value": "@equals(activity('Sum of Rows Read and Copied').output.value[0].TotalRead, activity('Sum of Rows Read and Copied').output.value[0].TotalWrite)\n",
 						"type": "Expression"
 					},
 					"ifFalseActivities": [
@@ -457,7 +457,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"message": {
-									"value": "Row count mismatch detected. Source row count: @{variables('Read')}, Sink row count: @{variables('Write')}.\n",
+									"value": "Row count mismatch detected. Source row count: @{activity('Sum of Rows Read and Copied').output.value[0].TotalRead}, Sink row count: @{activity('Sum of Rows Read and Copied').output.value[0].TotalWrite}.",
 									"type": "Expression"
 								},
 								"errorCode": {
@@ -547,13 +547,6 @@
 										},
 										"type": "String"
 									},
-									"TableName": {
-										"value": {
-											"value": "@item().TableName",
-											"type": "Expression"
-										},
-										"type": "String"
-									},
 									"PipelineRunID": {
 										"value": {
 											"value": "@pipeline().RunId",
@@ -570,6 +563,42 @@
 						}
 					]
 				}
+			},
+			{
+				"name": "Sum of Rows Read and Copied",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Iterate the Tables",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT \n    SUM([Read]) AS TotalRead, \n    SUM([Write]) AS TotalWrite\nFROM ArchivalMonitoring\nWHERE PipelineRunID = '@{pipeline().RunId}'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "CapatazDB",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
 			}
 		],
 		"parameters": {
@@ -579,17 +608,9 @@
 			}
 		},
 		"variables": {
-			"Read": {
-				"type": "String",
-				"defaultValue": "0"
-			},
-			"Write": {
-				"type": "String",
-				"defaultValue": "0"
-			},
 			"Year": {
 				"type": "Integer",
-				"defaultValue": 2023
+				"defaultValue": 2022
 			},
 			"Month": {
 				"type": "Integer",

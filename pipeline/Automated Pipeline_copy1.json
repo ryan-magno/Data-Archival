@@ -437,7 +437,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"message": {
-									"value": "Row count mismatch detected. Source row count: @{variables('Read')}, Sink row count: @{variables('Write')}.\n",
+									"value": "Row count mismatch detected. Source row count: @{activity('Sum of Rows Read and Copied').output.value[0].TotalRead}, Sink row count: @{activity('Sum of Rows Read and Copied').output.value[0].TotalWrite}.\n",
 									"type": "Expression"
 								},
 								"errorCode": {
@@ -588,14 +588,6 @@
 			}
 		},
 		"variables": {
-			"Read": {
-				"type": "String",
-				"defaultValue": "0"
-			},
-			"Write": {
-				"type": "String",
-				"defaultValue": "0"
-			},
 			"Deleted": {
 				"type": "Integer"
 			}
