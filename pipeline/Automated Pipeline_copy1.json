@@ -1,5 +1,5 @@
 {
-	"name": "Automated Pipeline",
+	"name": "Automated Pipeline_copy1",
 	"properties": {
 		"activities": [
 			{
@@ -319,145 +319,6 @@
 								"referenceName": "CapatazDBLinkedService",
 								"type": "LinkedServiceReference"
 							}
-						},
-						{
-							"name": "If Condition for Data Validation",
-							"type": "IfCondition",
-							"dependsOn": [
-								{
-									"activity": "Update Monitoring Table",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"userProperties": [],
-							"typeProperties": {
-								"expression": {
-									"value": "@equals(variables('Read'), variables('Write'))",
-									"type": "Expression"
-								},
-								"ifFalseActivities": [
-									{
-										"name": "Fail Activity",
-										"type": "Fail",
-										"dependsOn": [],
-										"userProperties": [],
-										"typeProperties": {
-											"message": {
-												"value": "Row count mismatch detected. Source row count: @{variables('Read')}, Sink row count: @{variables('Write')}.\n",
-												"type": "Expression"
-											},
-											"errorCode": {
-												"value": "RowCountMismatch",
-												"type": "Expression"
-											}
-										}
-									}
-								],
-								"ifTrueActivities": [
-									{
-										"name": "Delete Archived Data",
-										"type": "SqlServerStoredProcedure",
-										"dependsOn": [],
-										"policy": {
-											"timeout": "0.12:00:00",
-											"retry": 3,
-											"retryIntervalInSeconds": 30,
-											"secureOutput": false,
-											"secureInput": false
-										},
-										"userProperties": [],
-										"typeProperties": {
-											"storedProcedureName": "[dbo].[DeleteArchivedData]",
-											"storedProcedureParameters": {
-												"Day": {
-													"value": {
-														"value": "@item().ArchivalDay",
-														"type": "Expression"
-													},
-													"type": "Int16"
-												},
-												"Month": {
-													"value": {
-														"value": "@item().ArchivalMonth",
-														"type": "Expression"
-													},
-													"type": "Int16"
-												},
-												"PipelineRunID": {
-													"value": {
-														"value": "@pipeline().RunId",
-														"type": "Expression"
-													},
-													"type": "String"
-												},
-												"Year": {
-													"value": {
-														"value": "@item().ArchivalYear",
-														"type": "Expression"
-													},
-													"type": "Int16"
-												}
-											}
-										},
-										"linkedServiceName": {
-											"referenceName": "CapatazDBLinkedService",
-											"type": "LinkedServiceReference"
-										}
-									},
-									{
-										"name": "Log Deletion Errors",
-										"type": "SqlServerStoredProcedure",
-										"dependsOn": [
-											{
-												"activity": "Delete Archived Data",
-												"dependencyConditions": [
-													"Failed"
-												]
-											}
-										],
-										"policy": {
-											"timeout": "0.12:00:00",
-											"retry": 3,
-											"retryIntervalInSeconds": 30,
-											"secureOutput": false,
-											"secureInput": false
-										},
-										"userProperties": [],
-										"typeProperties": {
-											"storedProcedureName": "[dbo].[LogError]",
-											"storedProcedureParameters": {
-												"Errors": {
-													"value": {
-														"value": "@concat('Errors: ', string(activity('Delete Archived Data').output.message))\n",
-														"type": "Expression"
-													},
-													"type": "String"
-												},
-												"TableName": {
-													"value": {
-														"value": "@item().TableName",
-														"type": "Expression"
-													},
-													"type": "String"
-												},
-												"PipelineRunID": {
-													"value": {
-														"value": "@pipeline().RunId",
-														"type": "Expression"
-													},
-													"type": "String"
-												}
-											}
-										},
-										"linkedServiceName": {
-											"referenceName": "CapatazDBLinkedService",
-											"type": "LinkedServiceReference"
-										}
-									}
-								]
-							}
 						}
 					]
 				}
@@ -521,7 +382,7 @@
 				"type": "Lookup",
 				"dependsOn": [
 					{
-						"activity": "Iterate the Tables",
+						"activity": "If Condition for Data Validation",
 						"dependencyConditions": [
 							"Completed"
 						]
@@ -539,7 +400,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "SELECT \n    SUM([Read]) AS ReadSum,\n    SUM([Write]) AS WriteSum,\n    SUM([Remaining]) AS RemainingSum,\n    DB_NAME() AS DatabaseName,\n    [Year],\n    DATENAME(MONTH, DATEFROMPARTS(Year, Month, 1)) AS MonthName,\n    [Day],\n    CASE \n        WHEN MAX(CASE WHEN Status = 'Failed' THEN 1 ELSE 0 END) = 1 THEN 'Failed'\n        ELSE 'Success'\n    END AS FinalStatus,\n    Remarks,\n    FORMAT(\n        GETUTCDATE() AT TIME ZONE 'UTC' AT TIME ZONE 'Singapore Standard Time', \n        'MMMM dd, yyyy'\n    ) AS DateToday\nFROM ArchivalMonitoring\nWHERE PipelineRunID = '@{pipeline().RunId}'\nGROUP BY [Year], [Month], [Day], [Remarks];\n",
+							"value": "SELECT \n    SUM([Read]) AS ReadSum,\n    SUM([Write]) AS WriteSum,\n    SUM([Remaining]) AS RemainingSum,\n    DB_NAME() AS DatabaseName,\n    [Year],\n    DATENAME(MONTH, DATEFROMPARTS(Year, Month, 1)) AS MonthName,\n    [Day],\n    CASE \n        WHEN MAX(CASE WHEN Status = 'Failed' THEN 1 ELSE 0 END) = 1 THEN 'Failed'\n        WHEN MAX(CASE WHEN Status = 'Archived' THEN 1 ELSE 0 END) = 1 THEN 'Failed'\n        ELSE 'Success'\n    END AS FinalStatus,\n    Remarks,\n    FORMAT(\n        GETUTCDATE() AT TIME ZONE 'UTC' AT TIME ZONE 'Singapore Standard Time', \n        'MMMM dd, yyyy'\n    ) AS DateToday\nFROM ArchivalMonitoring\nWHERE PipelineRunID = '@{pipeline().RunId}'\nGROUP BY [Year], [Month], [Day], [Remarks];\n",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
@@ -549,6 +410,174 @@
 						"referenceName": "CapatazDB",
 						"type": "DatasetReference"
 					}
+				}
+			},
+			{
+				"name": "If Condition for Data Validation",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Sum of Rows Read and Copied",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(activity('Sum of Rows Read and Copied').output.value[0].TotalRead, activity('Sum of Rows Read and Copied').output.value[0].TotalWrite)\n",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Fail Activity",
+							"type": "Fail",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"message": {
+									"value": "Row count mismatch detected. Source row count: @{variables('Read')}, Sink row count: @{variables('Write')}.\n",
+									"type": "Expression"
+								},
+								"errorCode": {
+									"value": "RowCountMismatch",
+									"type": "Expression"
+								}
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Delete Archived Data",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 3,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[DeleteArchivedData]",
+								"storedProcedureParameters": {
+									"Day": {
+										"value": {
+											"value": "@activity('Get Metadata').output.value[0].ArchivalDay",
+											"type": "Expression"
+										},
+										"type": "Int16"
+									},
+									"Month": {
+										"value": {
+											"value": "@activity('Get Metadata').output.value[0].ArchivalMonth",
+											"type": "Expression"
+										},
+										"type": "Int16"
+									},
+									"PipelineRunID": {
+										"value": {
+											"value": "@pipeline().RunId",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"Year": {
+										"value": {
+											"value": "@activity('Get Metadata').output.value[0].ArchivalYear",
+											"type": "Expression"
+										},
+										"type": "Int16"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "CapatazDBLinkedService",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Log Deletion Errors",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Delete Archived Data",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 3,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[LogError]",
+								"storedProcedureParameters": {
+									"Errors": {
+										"value": {
+											"value": "@concat('Errors: ', string(activity('Delete Archived Data').output.message))\n",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"PipelineRunID": {
+										"value": {
+											"value": "@pipeline().RunId",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "CapatazDBLinkedService",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Sum of Rows Read and Copied",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Iterate the Tables",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT \n    SUM([Read]) AS TotalRead, \n    SUM([Write]) AS TotalWrite\nFROM ArchivalMonitoring\nWHERE PipelineRunID = '@{pipeline().RunId}'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "CapatazDB",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
 				}
 			}
 		],

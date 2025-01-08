@@ -312,145 +312,6 @@
 							}
 						},
 						{
-							"name": "If Condition for Data Validation",
-							"type": "IfCondition",
-							"dependsOn": [
-								{
-									"activity": "Update Monitoring Table",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"userProperties": [],
-							"typeProperties": {
-								"expression": {
-									"value": "@equals(variables('Read'), variables('Write'))",
-									"type": "Expression"
-								},
-								"ifFalseActivities": [
-									{
-										"name": "Fail Activity",
-										"type": "Fail",
-										"dependsOn": [],
-										"userProperties": [],
-										"typeProperties": {
-											"message": {
-												"value": "Row count mismatch detected. Source row count: @{variables('Read')}, Sink row count: @{variables('Write')}.\n",
-												"type": "Expression"
-											},
-											"errorCode": {
-												"value": "RowCountMismatch",
-												"type": "Expression"
-											}
-										}
-									}
-								],
-								"ifTrueActivities": [
-									{
-										"name": "Delete Archived Data",
-										"type": "SqlServerStoredProcedure",
-										"dependsOn": [],
-										"policy": {
-											"timeout": "0.12:00:00",
-											"retry": 0,
-											"retryIntervalInSeconds": 30,
-											"secureOutput": false,
-											"secureInput": false
-										},
-										"userProperties": [],
-										"typeProperties": {
-											"storedProcedureName": "[dbo].[DeleteArchivedData]",
-											"storedProcedureParameters": {
-												"Day": {
-													"value": {
-														"value": "@variables('Day')",
-														"type": "Expression"
-													},
-													"type": "Int16"
-												},
-												"Month": {
-													"value": {
-														"value": "@variables('Month')",
-														"type": "Expression"
-													},
-													"type": "Int16"
-												},
-												"PipelineRunID": {
-													"value": {
-														"value": "@pipeline().RunId",
-														"type": "Expression"
-													},
-													"type": "String"
-												},
-												"Year": {
-													"value": {
-														"value": "@variables('Year')",
-														"type": "Expression"
-													},
-													"type": "Int16"
-												}
-											}
-										},
-										"linkedServiceName": {
-											"referenceName": "CapatazDBLinkedService",
-											"type": "LinkedServiceReference"
-										}
-									},
-									{
-										"name": "Log Deletion Errors",
-										"type": "SqlServerStoredProcedure",
-										"dependsOn": [
-											{
-												"activity": "Delete Archived Data",
-												"dependencyConditions": [
-													"Failed"
-												]
-											}
-										],
-										"policy": {
-											"timeout": "0.12:00:00",
-											"retry": 0,
-											"retryIntervalInSeconds": 30,
-											"secureOutput": false,
-											"secureInput": false
-										},
-										"userProperties": [],
-										"typeProperties": {
-											"storedProcedureName": "[dbo].[LogError]",
-											"storedProcedureParameters": {
-												"Remarks": {
-													"value": {
-														"value": "@concat('Errors: ', string(activity('Delete Archived Data').output.message))\n\n",
-														"type": "Expression"
-													},
-													"type": "String"
-												},
-												"TableName": {
-													"value": {
-														"value": "@item().TableName",
-														"type": "Expression"
-													},
-													"type": "String"
-												},
-												"PipelineRunID": {
-													"value": {
-														"value": "@pipeline().RunId",
-														"type": "Expression"
-													},
-													"type": "String"
-												}
-											}
-										},
-										"linkedServiceName": {
-											"referenceName": "CapatazDBLinkedService",
-											"type": "LinkedServiceReference"
-										}
-									}
-								]
-							}
-						},
-						{
 							"name": "RowCountDeleted Value and Errors",
 							"type": "Lookup",
 							"state": "Inactive",
@@ -541,9 +402,9 @@
 				"type": "Lookup",
 				"dependsOn": [
 					{
-						"activity": "Iterate the Tables",
+						"activity": "If Condition for Data Validation",
 						"dependencyConditions": [
-							"Completed"
+							"Succeeded"
 						]
 					}
 				],
@@ -569,6 +430,145 @@
 						"referenceName": "CapatazDB",
 						"type": "DatasetReference"
 					}
+				}
+			},
+			{
+				"name": "If Condition for Data Validation",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Iterate the Tables",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(variables('Read'), variables('Write'))",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Fail Activity",
+							"type": "Fail",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"message": {
+									"value": "Row count mismatch detected. Source row count: @{variables('Read')}, Sink row count: @{variables('Write')}.\n",
+									"type": "Expression"
+								},
+								"errorCode": {
+									"value": "RowCountMismatch",
+									"type": "Expression"
+								}
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Delete Archived Data",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[DeleteArchivedData]",
+								"storedProcedureParameters": {
+									"Day": {
+										"value": {
+											"value": "@variables('Day')",
+											"type": "Expression"
+										},
+										"type": "Int16"
+									},
+									"Month": {
+										"value": {
+											"value": "@variables('Month')",
+											"type": "Expression"
+										},
+										"type": "Int16"
+									},
+									"PipelineRunID": {
+										"value": {
+											"value": "@pipeline().RunId",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"Year": {
+										"value": {
+											"value": "@variables('Year')",
+											"type": "Expression"
+										},
+										"type": "Int16"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "CapatazDBLinkedService",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Log Deletion Errors",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Delete Archived Data",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[LogError]",
+								"storedProcedureParameters": {
+									"Remarks": {
+										"value": {
+											"value": "@concat('Errors: ', string(activity('Delete Archived Data').output.message))\n\n",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"TableName": {
+										"value": {
+											"value": "@item().TableName",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"PipelineRunID": {
+										"value": {
+											"value": "@pipeline().RunId",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "CapatazDBLinkedService",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
 				}
 			}
 		],
