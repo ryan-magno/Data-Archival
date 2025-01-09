@@ -52,71 +52,9 @@
 					"batchCount": 2,
 					"activities": [
 						{
-							"name": "Start Monitoring",
-							"type": "SqlServerStoredProcedure",
-							"state": "Inactive",
-							"onInactiveMarkAs": "Succeeded",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "0.12:00:00",
-								"retry": 3,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"storedProcedureName": "[dbo].[StartMonitoring]",
-								"storedProcedureParameters": {
-									"PipelineRunID": {
-										"value": {
-											"value": "@pipeline().RunId",
-											"type": "Expression"
-										},
-										"type": "String"
-									},
-									"TableName": {
-										"value": {
-											"value": "@item().TableName",
-											"type": "Expression"
-										},
-										"type": "String"
-									},
-									"Year": {
-										"value": {
-											"value": "@variables('Year')",
-											"type": "Expression"
-										},
-										"type": "Int16"
-									},
-									"Month": {
-										"value": {
-											"value": "@variables('Month')",
-											"type": "Expression"
-										},
-										"type": "Int16"
-									},
-									"Day": {
-										"value": {
-											"value": "@variables('Day')",
-											"type": "Expression"
-										},
-										"type": "Int16"
-									}
-								}
-							}
-						},
-						{
 							"name": "SQL Database to ADLS",
 							"type": "Copy",
-							"dependsOn": [
-								{
-									"activity": "Start Monitoring",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
+							"dependsOn": [],
 							"policy": {
 								"timeout": "0.12:00:00",
 								"retry": 3,
@@ -309,58 +247,6 @@
 							"linkedServiceName": {
 								"referenceName": "CapatazDBLinkedService",
 								"type": "LinkedServiceReference"
-							}
-						},
-						{
-							"name": "RowCountDeleted Value and Errors",
-							"type": "Lookup",
-							"state": "Inactive",
-							"onInactiveMarkAs": "Succeeded",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "0.12:00:00",
-								"retry": 3,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"source": {
-									"type": "AzureSqlSource",
-									"sqlReaderQuery": {
-										"value": "SELECT RowCountDeleted, Errors\nFROM dbo.ArchivalMonitoring\nWHERE TableName = '@{item().TableName}'\n  AND PipelineRunID = '@{pipeline().RunId}'",
-										"type": "Expression"
-									},
-									"queryTimeout": "02:00:00",
-									"partitionOption": "None"
-								}
-							}
-						},
-						{
-							"name": "Emailing Data",
-							"type": "SetVariable",
-							"state": "Inactive",
-							"onInactiveMarkAs": "Succeeded",
-							"dependsOn": [
-								{
-									"activity": "RowCountDeleted Value and Errors",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "AuditData",
-								"value": {
-									"value": "@concat(variables('AuditData'), [\n  {\n    \"TableName\": \"@{item().TableName}\",\n    \"RowsRead\": \"@{activity('SQL Database to ADLS').output.rowsRead}\",\n    \"RowsCopied\": \"@{activity('SQL Database to ADLS').output.rowsCopied}\",\n    \"RowCountDeleted\": \"@{activity('RowCountDeleted Value and Errors').output.firstRow.RowCountDeleted}\",\n    \"Errors\": \"@{activity('RowCountDeleted Value and Errors').output.firstRow.Errors}\",\n    \"Year\": \"@{variables('Year')}\",\n    \"Month\": \"@{variables('Month')}\",\n    \"Day\": \"@{variables('Day')}\",\n    \"TriggerTime\": \"@{formatDateTime(addHours(pipeline().TriggerTime, 8), 'yyyy-MM-ddTHH:mm:ssZ')}\"\n  }\n])\n",
-									"type": "Expression"
-								}
 							}
 						}
 					]
