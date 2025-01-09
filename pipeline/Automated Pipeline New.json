@@ -60,71 +60,9 @@
 					"batchCount": 2,
 					"activities": [
 						{
-							"name": "Start Monitoring",
-							"type": "SqlServerStoredProcedure",
-							"state": "Inactive",
-							"onInactiveMarkAs": "Succeeded",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "0.12:00:00",
-								"retry": 3,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"storedProcedureName": "[dbo].[StartMonitoring]",
-								"storedProcedureParameters": {
-									"PipelineRunID": {
-										"value": {
-											"value": "@pipeline().RunId",
-											"type": "Expression"
-										},
-										"type": "String"
-									},
-									"TableName": {
-										"value": {
-											"value": "@item().TableName",
-											"type": "Expression"
-										},
-										"type": "String"
-									},
-									"Year": {
-										"value": {
-											"value": "@item().ArchivalYear",
-											"type": "Expression"
-										},
-										"type": "Int16"
-									},
-									"Month": {
-										"value": {
-											"value": "@item().ArchivalMonth",
-											"type": "Expression"
-										},
-										"type": "Int16"
-									},
-									"Day": {
-										"value": {
-											"value": "@item().ArchivalDay",
-											"type": "Expression"
-										},
-										"type": "Int16"
-									}
-								}
-							}
-						},
-						{
 							"name": "SQL Database to ADLS",
 							"type": "Copy",
-							"dependsOn": [
-								{
-									"activity": "Start Monitoring",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
+							"dependsOn": [],
 							"policy": {
 								"timeout": "0.12:00:00",
 								"retry": 3,
