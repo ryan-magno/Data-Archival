@@ -530,6 +530,8 @@
 			{
 				"name": "Get Start Time",
 				"type": "SetVariable",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"secureOutput": false,
@@ -542,7 +544,8 @@
 						{
 							"key": "StartTime",
 							"value": {
-								"type": "String"
+								"type": "String",
+								"content": "@utcNow()"
 							}
 						}
 					],
@@ -572,7 +575,7 @@
 							"key": "TotalRuntime",
 							"value": {
 								"type": "Expression",
-								"content": "@concat(string(div(div(sub(ticks(utcNow()), ticks(variables('StartTime'))), 10000000), 60)), ' minutes ', string(mod(div(sub(ticks(utcNow()), ticks(variables('StartTime'))), 10000000), 60)), ' seconds')\n"
+								"content": "@concat(\n    string(div(div(sub(ticks(formatDateTime(utcNow(), 'yyyy-MM-ddTHH:mm:ss')), ticks(formatDateTime(pipeline().TriggerTime, 'yyyy-MM-ddTHH:mm:ss'))), 10000000), 60)), \n    'H:', \n    string(mod(div(sub(ticks(formatDateTime(utcNow(), 'yyyy-MM-ddTHH:mm:ss')), ticks(formatDateTime(pipeline().TriggerTime, 'yyyy-MM-ddTHH:mm:ss'))), 10000000), 60)), \n    'M:00s'\n)\n"
 							}
 						}
 					],
