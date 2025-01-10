@@ -237,7 +237,7 @@
 								"type": "Expression"
 							},
 							"isSequential": false,
-							"batchCount": 3,
+							"batchCount": 6,
 							"activities": [
 								{
 									"name": "SQL Database to ADLS",
@@ -492,7 +492,7 @@
 							"headers": {},
 							"url": "https://prod-53.southeastasia.logic.azure.com:443/workflows/9d03871925c7476eaada332752f94139/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=oscBaQ3CM6o9Wl0kcmEw8rA9tDTyo3bAeNbYADRHa2M",
 							"body": {
-								"value": "{\n    \"PipelineRunID\": \"@{pipeline().RunId}\",\n    \"ReadSum\": \"@{activity('Email Contents').output.firstRow.ReadSum}\",\n    \"WriteSum\": \"@{activity('Email Contents').output.firstRow.WriteSum}\",\n    \"RemainingSum\": \"@{activity('Email Contents').output.firstRow.RemainingSum}\",\n    \"DatabaseName\": \"@{activity('Email Contents').output.firstRow.DatabaseName}\",\n    \"Year\": \"@{activity('Email Contents').output.firstRow.Year}\",\n    \"Month\": \"@{activity('Email Contents').output.firstRow.MonthName}\",\n    \"Day\": \"@{activity('Email Contents').output.firstRow.Day}\",\n    \"Status\": \"@{activity('Email Contents').output.firstRow.FinalStatus}\",\n    \"Remarks\": \"@{activity('Email Contents').output.firstRow.Remarks}\",\n    \"DateToday\": \"@{activity('Email Contents').output.firstRow.DateToday}\",\n    \"PipelineRuntime\": \"@{variables('PipelineRuntime')}\"\n}",
+								"value": "{\n    \"PipelineRunID\": \"@{pipeline().RunId}\",\n    \"ReadSum\": \"@{activity('Email Contents').output.firstRow.ReadSum}\",\n    \"WriteSum\": \"@{activity('Email Contents').output.firstRow.WriteSum}\",\n    \"RemainingSum\": \"@{activity('Email Contents').output.firstRow.RemainingSum}\",\n    \"DatabaseName\": \"@{activity('Email Contents').output.firstRow.DatabaseName}\",\n    \"Year\": \"@{activity('Email Contents').output.firstRow.Year}\",\n    \"Month\": \"@{activity('Email Contents').output.firstRow.MonthName}\",\n    \"Day\": \"@{activity('Email Contents').output.firstRow.Day}\",\n    \"Status\": \"@{activity('Email Contents').output.firstRow.FinalStatus}\",\n    \"DateToday\": \"@{activity('Email Contents').output.firstRow.DateToday}\",\n    \"TotalRuntime\": \"@{variables('TotalRuntime')}\"\n}",
 								"type": "Expression"
 							}
 						}
@@ -719,7 +719,7 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"variableName": "PipelineRuntime",
+							"variableName": "TotalRuntime",
 							"value": {
 								"value": "@concat(\n    string(div(div(sub(ticks(utcNow()), ticks(pipeline().TriggerTime)), 10000000), 3600)), 'H:',\n    string(div(mod(div(sub(ticks(utcNow()), ticks(pipeline().TriggerTime)), 10000000), 3600), 60)), 'M:',\n    string(mod(div(sub(ticks(utcNow()), ticks(pipeline().TriggerTime)), 10000000), 60)), 'S'\n)",
 								"type": "Expression"
@@ -737,7 +737,7 @@
 					}
 				},
 				"variables": {
-					"PipelineRuntime": {
+					"TotalRuntime": {
 						"type": "String"
 					}
 				},
