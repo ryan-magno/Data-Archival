@@ -266,7 +266,7 @@
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
-						"activity": "Set variable1",
+						"activity": "StartTime",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -552,13 +552,20 @@
 								"type": "Expression",
 								"content": "@concat(\n    string(div(div(sub(ticks(utcNow()), ticks(pipeline().TriggerTime)), 10000000), 3600)), 'H:',\n    string(div(mod(div(sub(ticks(utcNow()), ticks(pipeline().TriggerTime)), 10000000), 3600), 60)), 'M:',\n    string(mod(div(sub(ticks(utcNow()), ticks(pipeline().TriggerTime)), 10000000), 60)), 'S'\n)\n"
 							}
+						},
+						{
+							"key": "UTCEndTime",
+							"value": {
+								"type": "Expression",
+								"content": "@utcNow()"
+							}
 						}
 					],
 					"setSystemVariable": true
 				}
 			},
 			{
-				"name": "Set variable1",
+				"name": "StartTime",
 				"type": "SetVariable",
 				"dependsOn": [],
 				"policy": {
@@ -574,6 +581,13 @@
 							"value": {
 								"type": "Expression",
 								"content": "@pipeline().TriggerTime"
+							}
+						},
+						{
+							"key": "UTCStartTime",
+							"value": {
+								"type": "Expression",
+								"content": "@utcNow()"
 							}
 						}
 					],
