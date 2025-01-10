@@ -1129,12 +1129,6 @@
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
-				"parameters": {
-					"MetadataTableName": {
-						"type": "string",
-						"defaultValue": "dbo.MetadataTable"
-					}
-				},
 				"variables": {
 					"Year": {
 						"type": "Integer",
