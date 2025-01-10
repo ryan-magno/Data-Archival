@@ -445,14 +445,7 @@
 					{
 						"name": "Update Metadata",
 						"type": "SqlServerStoredProcedure",
-						"dependsOn": [
-							{
-								"activity": "Get Start Time",
-								"dependencyConditions": [
-									"Completed"
-								]
-							}
-						],
+						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
 							"retry": 3,
@@ -709,30 +702,6 @@
 								"parameters": {}
 							},
 							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "Get Start Time",
-						"type": "SetVariable",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
-						"dependsOn": [],
-						"policy": {
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "pipelineReturnValue",
-							"value": [
-								{
-									"key": "StartTime",
-									"value": {
-										"type": "String"
-									}
-								}
-							],
-							"setSystemVariable": true
 						}
 					},
 					{
