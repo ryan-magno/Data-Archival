@@ -297,6 +297,8 @@
 			{
 				"name": "Send Email",
 				"type": "WebActivity",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Get Total Runtime",
@@ -540,8 +542,7 @@
 						{
 							"key": "StartTime",
 							"value": {
-								"type": "Expression",
-								"content": "@addHours(utcNow(), 8)"
+								"type": "String"
 							}
 						}
 					],
@@ -568,10 +569,10 @@
 					"variableName": "pipelineReturnValue",
 					"value": [
 						{
-							"key": "EndTime",
+							"key": "TotalRuntime",
 							"value": {
 								"type": "Expression",
-								"content": "@concat(\r\n    string(div(sub(ticks(addHours(utcNow(), 8)), ticks(variables('StartTime'))), 600000000)), \r\n    ' minutes ', \r\n    string(div(mod(sub(ticks(addHours(utcNow(), 8)), ticks(variables('StartTime'))), 600000000), 10000000)), \r\n    ' seconds'\r\n)"
+								"content": "@concat(string(div(div(sub(ticks(utcNow()), ticks(variables('StartTime'))), 10000000), 60)), ' minutes ', string(mod(div(sub(ticks(utcNow()), ticks(variables('StartTime'))), 10000000), 60)), ' seconds')\n"
 							}
 						}
 					],
