@@ -543,12 +543,6 @@
 				}
 			}
 		],
-		"parameters": {
-			"MetadataTableName": {
-				"type": "string",
-				"defaultValue": "dbo.MetadataTable"
-			}
-		},
 		"variables": {
 			"TotalRuntime": {
 				"type": "String"
