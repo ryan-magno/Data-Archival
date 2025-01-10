@@ -57,7 +57,7 @@
 						"type": "Expression"
 					},
 					"isSequential": false,
-					"batchCount": 6,
+					"batchCount": 3,
 					"activities": [
 						{
 							"name": "SQL Database to ADLS",
