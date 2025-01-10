@@ -264,7 +264,14 @@
 			{
 				"name": "Update Metadata",
 				"type": "SqlServerStoredProcedure",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Get Start Time",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 3,
@@ -292,7 +299,7 @@
 				"type": "WebActivity",
 				"dependsOn": [
 					{
-						"activity": "Email Contents",
+						"activity": "Get Total Runtime",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -517,6 +524,59 @@
 					},
 					"firstRowOnly": false
 				}
+			},
+			{
+				"name": "Get Start Time",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "pipelineReturnValue",
+					"value": [
+						{
+							"key": "StartTime",
+							"value": {
+								"type": "Expression",
+								"content": "@addHours(utcNow(), 8)"
+							}
+						}
+					],
+					"setSystemVariable": true
+				}
+			},
+			{
+				"name": "Get Total Runtime",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Email Contents",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "pipelineReturnValue",
+					"value": [
+						{
+							"key": "EndTime",
+							"value": {
+								"type": "Expression",
+								"content": "@concat(\r\n    string(div(sub(ticks(addHours(utcNow(), 8)), ticks(variables('StartTime'))), 600000000)), \r\n    ' minutes ', \r\n    string(div(mod(sub(ticks(addHours(utcNow(), 8)), ticks(variables('StartTime'))), 600000000), 10000000)), \r\n    ' seconds'\r\n)"
+							}
+						}
+					],
+					"setSystemVariable": true
+				}
 			}
 		],
 		"parameters": {
@@ -526,8 +586,8 @@
 			}
 		},
 		"variables": {
-			"Deleted": {
-				"type": "Integer"
+			"StartTime": {
+				"type": "String"
 			}
 		},
 		"annotations": [],
