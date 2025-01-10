@@ -1397,7 +1397,7 @@
 								"type": "Expression"
 							},
 							"isSequential": false,
-							"batchCount": 2,
+							"batchCount": 6,
 							"activities": [
 								{
 									"name": "SQL Database to ADLS",
@@ -1628,7 +1628,7 @@
 								"type": "Expression"
 							},
 							"body": {
-								"value": "{\n    \"PipelineRunID\": \"@{pipeline().RunId}\",\n    \"ReadSum\": \"@{activity('Email Contents').output.firstRow.ReadSum}\",\n    \"WriteSum\": \"@{activity('Email Contents').output.firstRow.WriteSum}\",\n    \"RemainingSum\": \"@{activity('Email Contents').output.firstRow.RemainingSum}\",\n    \"DatabaseName\": \"@{activity('Email Contents').output.firstRow.DatabaseName}\",\n    \"Year\": \"@{activity('Email Contents').output.firstRow.Year}\",\n    \"Month\": \"@{activity('Email Contents').output.firstRow.MonthName}\",\n    \"Day\": \"@{activity('Email Contents').output.firstRow.Day}\",\n    \"Status\": \"@{activity('Email Contents').output.firstRow.FinalStatus}\",\n    \"DateToday\": \"@{activity('Email Contents').output.firstRow.DateToday}\",\n    \"TotalRuntime\": \"@{variables('TotalRuntime')}\n}\n",
+								"value": "{\n    \"PipelineRunID\": \"@{pipeline().RunId}\",\n    \"ReadSum\": \"@{activity('Email Contents').output.firstRow.ReadSum}\",\n    \"WriteSum\": \"@{activity('Email Contents').output.firstRow.WriteSum}\",\n    \"RemainingSum\": \"@{activity('Email Contents').output.firstRow.RemainingSum}\",\n    \"DatabaseName\": \"@{activity('Email Contents').output.firstRow.DatabaseName}\",\n    \"Year\": \"@{activity('Email Contents').output.firstRow.Year}\",\n    \"Month\": \"@{activity('Email Contents').output.firstRow.MonthName}\",\n    \"Day\": \"@{activity('Email Contents').output.firstRow.Day}\",\n    \"Status\": \"@{activity('Email Contents').output.firstRow.FinalStatus}\",\n    \"DateToday\": \"@{activity('Email Contents').output.firstRow.DateToday}\",\n    \"TotalRuntime\": \"@{variables('TotalRuntime')}\"\n}\n",
 								"type": "Expression"
 							}
 						}
@@ -1656,7 +1656,7 @@
 							"source": {
 								"type": "AzureSqlSource",
 								"sqlReaderQuery": {
-									"value": "SELECT \n    SUM([Read]) AS ReadSum,\n    SUM([Write]) AS WriteSum,\n    SUM([Remaining]) AS RemainingSum,\n    DB_NAME() AS DatabaseName,\n    [Year],\n    DATENAME(MONTH, DATEFROMPARTS(Year, Month, 1)) AS MonthName,\n    [Day],\n    CASE \n        WHEN MAX(CASE WHEN Status = 'Failed' THEN 1 ELSE 0 END) = 1 THEN 'Failed'\n        ELSE 'Success'\n    END AS FinalStatus,\n    Remarks,\n    FORMAT(\n        GETUTCDATE() AT TIME ZONE 'UTC' AT TIME ZONE 'Singapore Standard Time', \n        'MMMM dd, yyyy'\n    ) AS DateToday\nFROM ArchivalMonitoring\nWHERE PipelineRunID = '@{pipeline().RunId}'\nGROUP BY [Year], [Month], [Day], [Remarks];",
+									"value": "SELECT \n    SUM([Read]) AS ReadSum,\n    SUM([Write]) AS WriteSum,\n    SUM([Remaining]) AS RemainingSum,\n    DB_NAME() AS DatabaseName,\n    [Year],\n    DATENAME(MONTH, DATEFROMPARTS(Year, Month, 1)) AS MonthName,\n    CASE \n        WHEN [Day] = 0 THEN NULL \n        ELSE [Day] \n    END AS Day,\n    CASE \n        WHEN MAX(CASE WHEN Status = 'Failed' THEN 1 ELSE 0 END) = 1 THEN 'Failed'\n        ELSE 'Success'\n    END AS FinalStatus,\n    Remarks,\n    FORMAT(\n        GETUTCDATE() AT TIME ZONE 'UTC' AT TIME ZONE 'Singapore Standard Time', \n        'MMMM dd, yyyy'\n    ) AS DateToday\nFROM ArchivalMonitoring\nWHERE PipelineRunID = '@{pipeline().RunId}'\nGROUP BY [Year], [Month], [Day], [Remarks];",
 									"type": "Expression"
 								},
 								"queryTimeout": "02:00:00",
@@ -1879,7 +1879,7 @@
 					},
 					"Month": {
 						"type": "Integer",
-						"defaultValue": 6
+						"defaultValue": 9
 					},
 					"Day": {
 						"type": "Integer"
