@@ -294,7 +294,7 @@
 					{
 						"activity": "Get Total Runtime",
 						"dependencyConditions": [
-							"Succeeded"
+							"Completed"
 						]
 					}
 				],
@@ -525,7 +525,7 @@
 					{
 						"activity": "Email Contents",
 						"dependencyConditions": [
-							"Succeeded"
+							"Completed"
 						]
 					}
 				],
